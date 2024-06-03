@@ -6,12 +6,26 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Company>Tolly Hill</Company>
+    <Copyright>Copyright © 2022-2024  Ptolemy Hill</Copyright>
+    <Description>Debugger GUI for AssEmbly programs</Description>
+    <PackageProjectUrl>https://github.com/TollyH/AssEmbly.DebuggerGUI</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TollyH/AssEmbly.DebuggerGUI</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>4.1.0</Version>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="AssEmbly\**" />
     <EmbeddedResource Remove="AssEmbly\**" />
     <None Remove="AssEmbly\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="AssEmbly\AssEmbly.csproj">
+      <Properties>DefineConstants=$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;DISPLACEMENT;PROCESSOR;NO_AUTO_DEFINE;</Properties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
