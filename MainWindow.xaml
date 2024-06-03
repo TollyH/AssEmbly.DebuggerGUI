@@ -5,8 +5,87 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="450" Width="800">
+        Title="AssEmbly Debugger" Height="450" Width="800" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Grid.Column="0" Background="#7F000000">
+            <Menu.Resources>
+                <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+                    <Setter Property="OverridesDefaultStyle" Value="true" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Separator}">
+                                <Border Width="2" Margin="5,1" Background="#FF484848"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Menu.Resources>
+            <MenuItem Padding="0" ToolTip="Open Executable">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Stop">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/control-stop-square.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Restart">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/arrow-circle.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Resume">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/control.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Break">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/control-pause.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Step In">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/arrow-step.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Step Over">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/arrow-step-over.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Step Out">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/arrow-step-out.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="About">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/information.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
     </Grid>
 </Window>

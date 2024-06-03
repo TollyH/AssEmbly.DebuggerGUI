@@ -23,9 +23,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Icons\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="AssEmbly\AssEmbly.csproj">
       <Properties>DefineConstants=$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;DISPLACEMENT;PROCESSOR;NO_AUTO_DEFINE;</Properties>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\*.png" />
   </ItemGroup>
 
 </Project>
