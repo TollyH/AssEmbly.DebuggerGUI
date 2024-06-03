@@ -8,4 +8,10 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="AssEmbly\**" />
+    <EmbeddedResource Remove="AssEmbly\**" />
+    <None Remove="AssEmbly\**" />
+  </ItemGroup>
+
 </Project>

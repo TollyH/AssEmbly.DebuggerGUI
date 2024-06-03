@@ -1,0 +1,3 @@
+[submodule "AssEmbly"]
+	path = AssEmbly
+	url = https://github.com/TollyH/AssEmbly
