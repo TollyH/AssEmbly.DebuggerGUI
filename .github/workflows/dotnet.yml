@@ -1,0 +1,28 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build .NET
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Publish Project
+      run: dotnet publish AssEmbly.DebuggerGUI.csproj -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AssEmbly.DebuggerGUI
+        path: Publish/
+        if-no-files-found: error
