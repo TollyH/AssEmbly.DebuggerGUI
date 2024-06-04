@@ -5,87 +5,196 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="450" Width="800" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
+        Title="AssEmbly Debugger" Height="600" Width="1000" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.Column="0" Background="#7F000000">
-            <Menu.Resources>
-                <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
-                    <Setter Property="OverridesDefaultStyle" Value="true" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Separator}">
-                                <Border Width="2" Margin="5,1" Background="#FF484848"/>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Menu.Resources>
-            <MenuItem Padding="0" ToolTip="Open Executable">
+            <MenuItem Padding="0" ToolTip="Open Executable" Margin="5,0,0,0">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="Stop">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/control-stop-square.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/control-stop-square.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Padding="0" ToolTip="Restart">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/arrow-circle.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/arrow-circle.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="Resume">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/control.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/control.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Padding="0" ToolTip="Break">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/control-pause.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/control-pause.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="Step In">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/arrow-step.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/arrow-step.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Padding="0" ToolTip="Step Over">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/arrow-step-over.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/arrow-step-over.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Padding="0" ToolTip="Step Out">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/arrow-step-out.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/arrow-step-out.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Create Breakpoint">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Save Address">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Create Label">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/tag--plus.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Edit Status Flags">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/flag--pencil.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="About" Click="AboutItem_Click">
                 <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/information.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Image Source="pack://application:,,,/Icons/information.png"/>
                 </MenuItem.Icon>
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#BF000000"/>
+            <TabControl Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/processor.png"/>
+                            <TextBlock Text="Program" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/control-record.png"/>
+                            <TextBlock Text="Breakpoints" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/block.png"/>
+                            <TextBlock Text="Memory Regions" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/tag-label.png"/>
+                            <TextBlock Text="Labels" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/chart.png"/>
+                            <TextBlock Text="Heap Stats" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
+            <TabControl Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/drawer-open.png"/>
+                            <TextBlock Text="Registers" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/system-monitor.png"/>
+                            <TextBlock Text="Status" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#BF000000"/>
+            <TabControl Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/memory.png"/>
+                            <TextBlock Text="Memory" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/address-book.png"/>
+                            <TextBlock Text="Saved Addresses" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
+            <TabControl Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/layers-stack-arrange.png"/>
+                            <TextBlock Text="Stack" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/balloons.png"/>
+                            <TextBlock Text="Call Stack" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
         </Grid>
+        <GridSplitter Grid.Row="1" ResizeDirection="Rows" Height="2" Background="#BF000000" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
     </Grid>
 </Window>
