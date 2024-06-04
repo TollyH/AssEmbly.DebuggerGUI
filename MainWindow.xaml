@@ -20,7 +20,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Stop">
+            <MenuItem Padding="0" ToolTip="Stop" Click="StopItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-stop-square.png"/>
                 </MenuItem.Icon>
@@ -42,7 +42,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Step In">
+            <MenuItem Padding="0" ToolTip="Step In" Click="StepInItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step.png"/>
                 </MenuItem.Icon>

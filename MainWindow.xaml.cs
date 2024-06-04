@@ -7,12 +7,24 @@ using Microsoft.Win32;
 
 namespace AssEmbly.DebuggerGUI
 {
+    public enum RunningState
+    {
+        Stopped,
+        Paused,
+        Running,
+        AwaitingInput
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         public Processor? DebuggingProcessor { get; private set; }
+
+        private CancellationTokenSource cancellationTokenSource = new();
+
+        private BackgroundRunner? processorRunner;
 
         private readonly TextBlock[] registerValueBlocks;
         private readonly TextBlock[] registerValueExtraBlocks;
@@ -45,6 +57,11 @@ namespace AssEmbly.DebuggerGUI
             };
         }
 
+        ~MainWindow()
+        {
+            Dispose();
+        }
+
         public void LoadExecutable(string path)
         {
             AAPFile executable;
@@ -62,6 +79,8 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            Environment.CurrentDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+
             if (!ulong.TryParse(memorySizeInput.Text, out ulong memorySize))
             {
                 DialogPopup popup = new("Entered memory size is not valid.", "Error creating processor", DialogPopup.ErrorIcon)
@@ -77,6 +96,8 @@ namespace AssEmbly.DebuggerGUI
                 DebuggingProcessor = new Processor(memorySize, executable.EntryPoint,
                     forceV1.IsChecked ?? false, mapStack.IsChecked ?? true, autoEcho.IsChecked ?? false);
                 DebuggingProcessor.LoadProgram(executable.Program);
+                processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher);
+                UpdateRunningState(RunningState.Paused);
             }
             catch (Exception exc)
             {
@@ -90,6 +111,16 @@ namespace AssEmbly.DebuggerGUI
 
             executablePathText.Text = path;
             UpdateAllInformation();
+        }
+
+        public void UnloadExecutable()
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource = new CancellationTokenSource();
+
+            DebuggingProcessor = null;
+            processorRunner = null;
+            UpdateRunningState(RunningState.Stopped);
         }
 
         public void UpdateAllInformation()
@@ -155,6 +186,61 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateRunningState(RunningState state)
+        {
+            switch (state)
+            {
+                case RunningState.Stopped:
+                    runningStatusText.Foreground = Brushes.Red;
+                    runningStatusText.Text = "Stopped";
+                    break;
+                case RunningState.Paused:
+                    runningStatusText.Foreground = Brushes.Orange;
+                    runningStatusText.Text = "Paused";
+                    break;
+                case RunningState.Running:
+                    runningStatusText.Foreground = Brushes.LawnGreen;
+                    runningStatusText.Text = "Running";
+                    break;
+                case RunningState.AwaitingInput:
+                    runningStatusText.Foreground = Brushes.Cyan;
+                    runningStatusText.Text = "Awaiting Input";
+                    break;
+                default:
+                    runningStatusText.Foreground = Brushes.White;
+                    runningStatusText.Text = "Unknown";
+                    break;
+            }
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void OnBreak(bool halt)
+        {
+            UpdateRunningState(RunningState.Paused);
+            UpdateAllInformation();
+            if (halt)
+            {
+                UnloadExecutable();
+            }
+        }
+
+        private void OnException(Exception exception)
+        {
+            DialogPopup popup = new($"{exception.GetType()}: {exception.Message}",
+                "AssEmbly Exception", DialogPopup.ErrorIcon)
+            {
+                Owner = this
+            };
+            popup.ShowDialog();
+            UnloadExecutable();
+        }
+
         private void AboutItem_Click(object sender, RoutedEventArgs e)
         {
             AboutWindow window = new()
@@ -177,6 +263,23 @@ namespace AssEmbly.DebuggerGUI
             {
                 LoadExecutable(dialog.FileName);
             }
+        }
+
+        private void StepInItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteSingleInstruction(OnBreak, OnException, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
+        }
+
+        private void StopItem_Click(object sender, RoutedEventArgs e)
+        {
+            UnloadExecutable();
         }
     }
 }
