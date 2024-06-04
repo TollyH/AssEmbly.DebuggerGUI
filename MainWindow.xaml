@@ -69,7 +69,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="About">
+            <MenuItem Padding="0" ToolTip="About" Click="AboutItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/information.png" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                 </MenuItem.Icon>

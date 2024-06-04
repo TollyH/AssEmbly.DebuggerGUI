@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/TollyH/AssEmbly.DebuggerGUI</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TollyH/AssEmbly.DebuggerGUI</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>4.1.0</Version>
+    <Version>1.0.0</Version>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 

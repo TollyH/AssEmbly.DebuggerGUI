@@ -11,5 +11,14 @@ namespace AssEmbly.DebuggerGUI
         {
             InitializeComponent();
         }
+
+        private void AboutItem_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow window = new()
+            {
+                Owner = this
+            };
+            window.ShowDialog();
+        }
     }
 }
