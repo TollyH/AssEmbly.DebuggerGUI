@@ -5,14 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="600" Width="1000" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
+        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" Grid.Column="0" Background="#7F000000">
+        <Menu Grid.Row="0" Background="#7F000000">
             <MenuItem Padding="0" ToolTip="Open Executable" Margin="5,0,0,0">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
@@ -196,5 +197,8 @@
             </TabControl>
         </Grid>
         <GridSplitter Grid.Row="1" ResizeDirection="Rows" Height="2" Background="#BF000000" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
+        <StatusBar Grid.Row="3" Background="#7F000000">
+            <TextBlock Text="No executable loaded" Foreground="White"/>
+        </StatusBar>
     </Grid>
 </Window>
