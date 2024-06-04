@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Background="#7F000000">
-            <MenuItem Padding="0" ToolTip="Open Executable" Margin="5,0,0,0">
+            <MenuItem Padding="0" ToolTip="Open Executable" Margin="5,0,0,0" Click="OpenItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
@@ -138,6 +138,23 @@
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/gear.png"/>
+                            <TextBlock Text="New Processor Options" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <TextBox x:Name="memorySizeInput" Text="8192" Padding="2,0" MaxLength="9" MinWidth="48"/>
+                            <TextBlock Foreground="White" Margin="10,0,0,0" Text="Memory size" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <CheckBox x:Name="mapStack" Margin="5" Content="Mapped stack" Foreground="White" IsChecked="True"/>
+                        <CheckBox x:Name="forceV1" Margin="5" Content="Force V1 call stack" Foreground="White"/>
+                        <CheckBox x:Name="autoEcho" Margin="5" Content="Start with auto echo enabled" Foreground="White"/>
+                    </StackPanel>
+                </TabItem>
             </TabControl>
             <TabControl Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}">
                 <TabItem>
@@ -207,11 +224,20 @@
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/terminal.png"/>
+                            <TextBlock Text="Console" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
             </TabControl>
         </Grid>
         <GridSplitter Grid.Row="1" ResizeDirection="Rows" Height="2" Background="#BF000000" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
-        <StatusBar Grid.Row="3" Background="#7F000000">
-            <TextBlock Text="No executable loaded" Foreground="White"/>
-        </StatusBar>
+        <Grid Grid.Row="3" Background="#7F000000">
+            <TextBlock x:Name="executablePathText" Margin="5" Text="No executable loaded" Foreground="White" HorizontalAlignment="Left"/>
+            <TextBlock x:Name="runningStatusText" Margin="5" Text="Stopped" Foreground="Red" HorizontalAlignment="Right"/>
+        </Grid>
     </Grid>
 </Window>
