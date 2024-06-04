@@ -79,6 +79,11 @@
                     <Image Source="pack://application:,,,/Icons/flag--pencil.png"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Padding="0" ToolTip="Edit Program">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/bandaid.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="About" Click="AboutItem_Click">
                 <MenuItem.Icon>
@@ -173,6 +178,14 @@
                         <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/address-book.png"/>
                             <TextBlock Text="Saved Addresses" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/memory-pencil.png"/>
+                            <TextBlock Text="Persistent Edits" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>
