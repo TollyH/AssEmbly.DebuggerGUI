@@ -13,7 +13,7 @@
             <TextBlock x:Name="versionAssEmblyText" d:Text="Bundled AssEmbly Version: x.x.x.x" Foreground="White" FontSize="16"/>
             <TextBlock Text="Attribution" Foreground="White" FontWeight="Bold" FontSize="18" Margin="0,10,0,0"/>
             <TextBlock Text="Icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License." Foreground="White" FontSize="16"/>
-            <TextBlock Text="http://p.yusukekamiyamane.com/" Foreground="Cyan" FontSize="16" TextDecorations="Underline" Background="Transparent" HorizontalAlignment="Left" MouseUp="IconAttribution_MouseUp"/>
+            <TextBlock Text="http://p.yusukekamiyamane.com/" Foreground="Cyan" FontSize="16" TextDecorations="Underline" Background="Transparent" HorizontalAlignment="Left" MouseUp="IconAttribution_MouseUp" Cursor="Hand"/>
             <TextBlock x:Name="copyrightText" d:Text="Copyright Placeholder -- Ptolemy Hill" Foreground="#FFBDBDBD" FontSize="16" Margin="0,15,0,0" HorizontalAlignment="Center"/>
             <TextBlock Text="This program is free software licensed under GPLv3" Foreground="#FFBDBDBD" FontSize="16" HorizontalAlignment="Center" Margin="0,5,0,0"/>
         </StackPanel>
