@@ -105,6 +105,20 @@
                             <TextBlock Text="Program" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <Grid Background="Transparent" SizeChanged="ProgramGrid_SizeChanged" MouseWheel="ProgramGrid_MouseWheel">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" BorderBrush="#7F000000" BorderThickness="0,0,1,0">
+                            <StackPanel x:Name="programBreakpointsPanel" Background="#26FFFFFF"/>
+                        </Border>
+                        <StackPanel x:Name="programLinesPanel" Grid.Column="1" Background="#26FFFFFF"/>
+                        <StackPanel x:Name="programCodePanel" Grid.Column="2"/>
+                        <ScrollBar x:Name="programScroll" Grid.Column="3" SmallChange="1" Scroll="programScroll_Scroll"/>
+                    </Grid>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>

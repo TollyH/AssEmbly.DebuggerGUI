@@ -35,6 +35,15 @@ namespace AssEmbly.DebuggerGUI
         private readonly VirtualConsoleOutputStream consoleOutput;
         private readonly VirtualConsoleInputStream consoleInput;
 
+        private readonly DisassemblerOptions disassemblerOptions = new(false, false, true, true, true);
+
+        private Dictionary<ulong, (string Line, List<ulong> References)> disassembledLines = new();
+        private List<Range> disassembledAddresses = new();
+
+        private readonly FontFamily codeFont = new("Cascadia Code");
+
+        private const double lineHeight = 15;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -125,6 +134,104 @@ namespace AssEmbly.DebuggerGUI
             lastOpenedPath = path;
             executablePathText.Text = path;
             UpdateAllInformation();
+            ReloadDisassembly();
+            DisassembleFromProgramOffset(executable.EntryPoint);
+        }
+
+        private void ReloadDisassemblyAfterPosition(int start)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            ReadOnlySpan<byte> memory = DebuggingProcessor.Memory;
+            while (start < DebuggingProcessor.Memory.Length)
+            {
+                (string line, ulong additionalOffset, List<ulong> references, _) =
+                    Disassembler.DisassembleInstruction(memory[start..], disassemblerOptions, false);
+
+                disassembledLines[(ulong)start] = (line, references);
+                disassembledAddresses.Add(new Range(start, start + (long)additionalOffset));
+
+                start += (int)additionalOffset;
+            }
+
+            programScroll.Maximum = disassembledLines.Count;
+
+            UpdateDisassemblyView();
+        }
+
+        public void ReloadDisassembly()
+        {
+            disassembledLines.Clear();
+            disassembledAddresses.Clear();
+
+            ReloadDisassemblyAfterPosition(0);
+        }
+
+        public void ScrollToProgramOffset(ulong offset)
+        {
+            int closestIndex = 0;
+            int bestDistance = int.MaxValue;
+            for (int i = 0; i < disassembledAddresses.Count; i++)
+            {
+                int distance = (int)Math.Abs(disassembledAddresses[i].Start - (long)offset);
+                if (distance < bestDistance)
+                {
+                    closestIndex = i;
+                    bestDistance = distance;
+                }
+                else if (distance > bestDistance)
+                {
+                    // We're getting further away and disassembledAddresses is always in order, so we can stop here.
+                    break;
+                }
+            }
+            if (closestIndex < programScroll.Value || closestIndex >= programScroll.Value + programScroll.ViewportSize)
+            {
+                // Desired item is out of view - scroll it to center (the ScrollBar will clamp the value for us)
+                programScroll.Value = closestIndex - (programScroll.ViewportSize / 2);
+            }
+        }
+
+        public void DisassembleFromProgramOffset(ulong offset)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (disassembledLines.ContainsKey(offset))
+            {
+                // The given offset was already considered to be the start of an instruction,
+                // no further disassembly is required.
+                return;
+            }
+
+            // Remove any conflicting disassembled lines
+            disassembledAddresses = disassembledAddresses.Where(a => a.End <= (long)offset).ToList();
+            if (disassembledAddresses.Count > 0)
+            {
+                ulong maxStartAddress = (ulong)disassembledAddresses.Select(a => a.Start).Max();
+                disassembledLines = disassembledLines.Where(kv => kv.Key <= maxStartAddress).ToDictionary(kv => kv.Key, kv => kv.Value);
+            }
+            else
+            {
+                disassembledLines = new Dictionary<ulong, (string Line, List<ulong> References)>();
+            }
+
+            // Fill space between offset and last valid instruction with %DAT
+            for (long i = disassembledAddresses.Select(a => a.End).ToList().MaxOrDefault(0); i < (long)offset; i++)
+            {
+                disassembledAddresses.Add(new Range(i, i + 1));
+                disassembledLines[(ulong)i] = ($"%DAT 0x{DebuggingProcessor.Memory[i]:X2}", new List<ulong>());
+            }
+
+            // Re-disassemble everything after the given offset
+            ReloadDisassemblyAfterPosition((int)offset);
+
+            UpdateDisassemblyView();
         }
 
         public void UnloadExecutable()
@@ -142,6 +249,7 @@ namespace AssEmbly.DebuggerGUI
         public void UpdateAllInformation()
         {
             UpdateRegistersView();
+            UpdateDisassemblyView();
         }
 
         public void UpdateRegistersView()
@@ -202,6 +310,72 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void ReloadDisassemblyView()
+        {
+            programBreakpointsPanel.Children.Clear();
+            programLinesPanel.Children.Clear();
+            programCodePanel.Children.Clear();
+
+            int lineCount = (int)(programCodePanel.ActualHeight / lineHeight);
+            for (int i = 0; i < lineCount; i++)
+            {
+                // TODO: Clickable breakpoints
+                programBreakpointsPanel.Children.Add(new UIElement());
+                programLinesPanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 5, 0),
+                    FontFamily = codeFont,
+                    Height = lineHeight
+                });
+                programCodePanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5, 0, 0, 0),
+                    FontFamily = codeFont,
+                    Height = lineHeight
+                });
+            }
+
+            programScroll.ViewportSize = lineCount;
+
+            UpdateDisassemblyView();
+        }
+
+        public void UpdateDisassemblyView()
+        {
+            int startAddressIndex = (int)programScroll.Value;
+            for (int i = 0; i < programCodePanel.Children.Count; i++)
+            {
+                if (startAddressIndex + i >= disassembledAddresses.Count)
+                {
+                    programBreakpointsPanel.Children[i].Visibility = Visibility.Collapsed;
+                    programLinesPanel.Children[i].Visibility = Visibility.Collapsed;
+                    programCodePanel.Children[i].Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    programBreakpointsPanel.Children[i].Visibility = Visibility.Visible;
+                    programLinesPanel.Children[i].Visibility = Visibility.Visible;
+                    programCodePanel.Children[i].Visibility = Visibility.Visible;
+
+                    Range addressRange = disassembledAddresses[startAddressIndex + i];
+                    TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
+                    lineBlock.Text = addressRange.Start.ToString("X16");
+                    lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
+                        ? Brushes.LightCoral
+                        : Brushes.White;
+                    // TODO: Show referenced label names
+                    // TODO: Syntax highlighting
+                    ((TextBlock)programCodePanel.Children[i]).Text = disassembledLines[(ulong)addressRange.Start].Line;
+                }
+            }
+        }
+
         public void UpdateRunningState(RunningState state)
         {
             switch (state)
@@ -238,6 +412,13 @@ namespace AssEmbly.DebuggerGUI
 
         private void OnBreak(bool halt)
         {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
+            ScrollToProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
             // The only way rpo can remain unchanged after execution is
             // if the program is waiting for more input data
             UpdateRunningState(
@@ -314,6 +495,22 @@ namespace AssEmbly.DebuggerGUI
         private void consoleOutputBlock_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             consoleScroll.ScrollToBottom();
+        }
+
+        private void programScroll_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            UpdateDisassemblyView();
+        }
+
+        private void ProgramGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ReloadDisassemblyView();
+        }
+
+        private void ProgramGrid_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            programScroll.Value -= Math.CopySign(programScroll.ActualHeight / lineHeight / 4, e.Delta);
+            UpdateDisassemblyView();
         }
     }
 }
