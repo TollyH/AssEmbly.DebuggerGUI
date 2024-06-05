@@ -1,8 +1,9 @@
-﻿using System.Windows.Threading;
+﻿using System.IO;
+using System.Windows.Threading;
 
 namespace AssEmbly.DebuggerGUI
 {
-    public class BackgroundRunner(Processor processor, Dispatcher callbackDispatcher)
+    public class BackgroundRunner(Processor processor, Dispatcher callbackDispatcher, Stream stdout, Stream stdin)
     {
         public delegate void ExecutionBreakCallback(bool halt);
         public delegate void ExceptionCallback(Exception exception);
@@ -29,7 +30,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 try
                 {
-                    bool halt = DebuggingProcessor.Execute(false);
+                    bool halt = DebuggingProcessor.Execute(false, stdout, stdin, false);
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         CallbackDispatcher.Invoke(() => breakCallback(halt));

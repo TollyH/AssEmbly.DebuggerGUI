@@ -304,6 +304,24 @@
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/terminal.png"/>
+                            <TextBlock Text="Console" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ScrollViewer x:Name="consoleScroll" Grid.Row="0" HorizontalScrollBarVisibility="Visible">
+                            <TextBlock x:Name="consoleOutputBlock" Background="#7F000000" Foreground="White" FontFamily="Cascadia Code" Padding="2" FontSize="14" SizeChanged="consoleOutputBlock_SizeChanged"/>
+                        </ScrollViewer>
+                        <TextBox x:Name="consoleInputBox" Grid.Row="1" VerticalAlignment="Bottom" Background="#CC000000" Foreground="White" SelectionBrush="LightCoral" BorderBrush="Black" AcceptsReturn="True" FontFamily="Cascadia Code" Padding="2" FontSize="14"/>
+                    </Grid>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/layers-stack-arrange.png"/>
                             <TextBlock Text="Stack" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
@@ -314,14 +332,6 @@
                         <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/balloons.png"/>
                             <TextBlock Text="Call Stack" Margin="5,0,0,0" Foreground="White"/>
-                        </StackPanel>
-                    </TabItem.Header>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/terminal.png"/>
-                            <TextBlock Text="Console" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>

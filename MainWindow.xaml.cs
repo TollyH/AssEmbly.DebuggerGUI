@@ -32,6 +32,9 @@ namespace AssEmbly.DebuggerGUI
         private readonly TextBlock[] registerValueExtraBlocks;
         private readonly Dictionary<StatusFlags, TextBlock> statusFlagBlocks;
 
+        private readonly VirtualConsoleOutputStream consoleOutput;
+        private readonly VirtualConsoleInputStream consoleInput;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -57,6 +60,9 @@ namespace AssEmbly.DebuggerGUI
                 { StatusFlags.Overflow, overflowFlagText },
                 { StatusFlags.AutoEcho, autoEchoFlagText }
             };
+
+            consoleOutput = new VirtualConsoleOutputStream(consoleOutputBlock, Dispatcher);
+            consoleInput = new VirtualConsoleInputStream(consoleInputBox, Dispatcher);
         }
 
         ~MainWindow()
@@ -100,7 +106,7 @@ namespace AssEmbly.DebuggerGUI
                 DebuggingProcessor = new Processor(memorySize, executable.EntryPoint,
                     forceV1.IsChecked ?? false, mapStack.IsChecked ?? true, autoEcho.IsChecked ?? false);
                 DebuggingProcessor.LoadProgram(executable.Program);
-                processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher);
+                processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher, consoleOutput, consoleInput);
                 UpdateRunningState(RunningState.Paused);
             }
             catch (Exception exc)
@@ -227,7 +233,12 @@ namespace AssEmbly.DebuggerGUI
 
         private void OnBreak(bool halt)
         {
-            UpdateRunningState(RunningState.Paused);
+            // The only way rpo can remain unchanged after execution is
+            // if the program is waiting for more input data
+            UpdateRunningState(
+                DebuggingProcessor?.Registers[(int)Register.rpo].ToString("X16") == rpoValue.Text
+                    ? RunningState.AwaitingInput
+                    : RunningState.Paused);
             UpdateAllInformation();
             if (halt)
             {
@@ -293,6 +304,11 @@ namespace AssEmbly.DebuggerGUI
             {
                 LoadExecutable(lastOpenedPath);
             }
+        }
+
+        private void consoleOutputBlock_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            consoleScroll.ScrollToBottom();
         }
     }
 }
