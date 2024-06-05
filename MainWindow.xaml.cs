@@ -42,7 +42,7 @@ namespace AssEmbly.DebuggerGUI
 
         private readonly FontFamily codeFont = new("Cascadia Code");
 
-        private const double lineHeight = 15;
+        private const double lineHeight = 18;
 
         public MainWindow()
         {
@@ -188,7 +188,7 @@ namespace AssEmbly.DebuggerGUI
                     break;
                 }
             }
-            if (closestIndex < programScroll.Value || closestIndex >= programScroll.Value + programScroll.ViewportSize)
+            if (closestIndex < programScroll.Value || closestIndex >= programScroll.Value + programScroll.ViewportSize - 1)
             {
                 // Desired item is out of view - scroll it to center (the ScrollBar will clamp the value for us)
                 programScroll.Value = closestIndex - (programScroll.ViewportSize / 2);
@@ -234,15 +234,20 @@ namespace AssEmbly.DebuggerGUI
             UpdateDisassemblyView();
         }
 
-        public void UnloadExecutable()
+        public void BreakExecution()
         {
             cancellationTokenSource.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
+        }
 
+        public void UnloadExecutable()
+        {
             DebuggingProcessor = null;
             processorRunner = null;
-            UpdateRunningState(RunningState.Stopped);
 
+            BreakExecution();
+
+            UpdateRunningState(RunningState.Stopped);
             executablePathText.Text = "No executable loaded";
         }
 
@@ -328,7 +333,8 @@ namespace AssEmbly.DebuggerGUI
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 5, 0),
                     FontFamily = codeFont,
-                    Height = lineHeight
+                    Height = lineHeight,
+                    FontSize = 14
                 });
                 programCodePanel.Children.Add(new TextBlock()
                 {
@@ -337,7 +343,8 @@ namespace AssEmbly.DebuggerGUI
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5, 0, 0, 0),
                     FontFamily = codeFont,
-                    Height = lineHeight
+                    Height = lineHeight,
+                    FontSize = 14
                 });
             }
 
@@ -410,21 +417,16 @@ namespace AssEmbly.DebuggerGUI
             GC.SuppressFinalize(this);
         }
 
-        private void OnBreak(bool halt)
+        private void OnBreak(BackgroundRunner sender, bool halt)
         {
-            if (DebuggingProcessor is null)
+            if (DebuggingProcessor is null || !ReferenceEquals(processorRunner, sender))
             {
                 return;
             }
 
             DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
             ScrollToProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
-            // The only way rpo can remain unchanged after execution is
-            // if the program is waiting for more input data
-            UpdateRunningState(
-                DebuggingProcessor?.Registers[(int)Register.rpo].ToString("X16") == rpoValue.Text
-                    ? RunningState.AwaitingInput
-                    : RunningState.Paused);
+            UpdateRunningState(consoleInput.EmptyReadAttempt ? RunningState.AwaitingInput : RunningState.Paused);
             UpdateAllInformation();
             if (halt)
             {
@@ -432,8 +434,13 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        private void OnException(Exception exception)
+        private void OnException(BackgroundRunner sender, Exception exception)
         {
+            if (!ReferenceEquals(processorRunner, sender))
+            {
+                return;
+            }
+
             DialogPopup popup = new($"{exception.GetType()}: {exception.Message}",
                 "AssEmbly Exception", DialogPopup.ErrorIcon)
             {
@@ -511,6 +518,23 @@ namespace AssEmbly.DebuggerGUI
         {
             programScroll.Value -= Math.CopySign(programScroll.ActualHeight / lineHeight / 4, e.Delta);
             UpdateDisassemblyView();
+        }
+
+        private void BreakItem_Click(object sender, RoutedEventArgs e)
+        {
+            BreakExecution();
+        }
+
+        private void ResumeItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, new List<Predicate<Processor>>(), cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
         }
     }
 }

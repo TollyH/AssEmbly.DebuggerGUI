@@ -31,12 +31,12 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Resume">
+            <MenuItem Padding="0" ToolTip="Resume" Click="ResumeItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Break">
+            <MenuItem Padding="0" ToolTip="Break" Click="BreakItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-pause.png"/>
                 </MenuItem.Icon>

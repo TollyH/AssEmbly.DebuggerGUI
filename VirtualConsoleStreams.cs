@@ -78,6 +78,21 @@ namespace AssEmbly.DebuggerGUI
 
     public class VirtualConsoleInputStream(TextBox consoleText, Dispatcher wpfDispatcher) : Stream
     {
+        private bool _emptyReadAttempt = false;
+        public bool EmptyReadAttempt
+        {
+            get
+            {
+                if (_emptyReadAttempt)
+                {
+                    _emptyReadAttempt = false;
+                    return true;
+                }
+                return false;
+            }
+            private set => _emptyReadAttempt = value;
+        }
+
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
@@ -108,6 +123,7 @@ namespace AssEmbly.DebuggerGUI
         {
             if (consoleText.Text.Length == 0)
             {
+                EmptyReadAttempt = true;
                 return -1;
             }
 
