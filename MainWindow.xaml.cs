@@ -119,6 +119,9 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            consoleOutputBlock.Text = "";
+            consoleInputBox.Text = "";
+
             lastOpenedPath = path;
             executablePathText.Text = path;
             UpdateAllInformation();
@@ -132,6 +135,8 @@ namespace AssEmbly.DebuggerGUI
             DebuggingProcessor = null;
             processorRunner = null;
             UpdateRunningState(RunningState.Stopped);
+
+            executablePathText.Text = "No executable loaded";
         }
 
         public void UpdateAllInformation()
