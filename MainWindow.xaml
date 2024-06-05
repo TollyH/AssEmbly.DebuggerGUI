@@ -25,7 +25,7 @@
                     <Image Source="pack://application:,,,/Icons/control-stop-square.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Restart">
+            <MenuItem Padding="0" ToolTip="Restart" Click="RestartItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-circle.png"/>
                 </MenuItem.Icon>

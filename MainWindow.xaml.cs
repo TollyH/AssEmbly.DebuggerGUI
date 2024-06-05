@@ -22,6 +22,8 @@ namespace AssEmbly.DebuggerGUI
     {
         public Processor? DebuggingProcessor { get; private set; }
 
+        private string? lastOpenedPath;
+
         private CancellationTokenSource cancellationTokenSource = new();
 
         private BackgroundRunner? processorRunner;
@@ -67,7 +69,7 @@ namespace AssEmbly.DebuggerGUI
             AAPFile executable;
             try
             {
-                executable = new(File.ReadAllBytes(path));
+                executable = new AAPFile(File.ReadAllBytes(path));
             }
             catch (Exception exc)
             {
@@ -91,6 +93,8 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            UnloadExecutable();
+
             try
             {
                 DebuggingProcessor = new Processor(memorySize, executable.EntryPoint,
@@ -109,6 +113,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            lastOpenedPath = path;
             executablePathText.Text = path;
             UpdateAllInformation();
         }
@@ -280,6 +285,14 @@ namespace AssEmbly.DebuggerGUI
         private void StopItem_Click(object sender, RoutedEventArgs e)
         {
             UnloadExecutable();
+        }
+
+        private void RestartItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (lastOpenedPath is not null)
+            {
+                LoadExecutable(lastOpenedPath);
+            }
         }
     }
 }
