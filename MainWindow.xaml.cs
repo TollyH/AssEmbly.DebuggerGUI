@@ -447,6 +447,8 @@ namespace AssEmbly.DebuggerGUI
                 Owner = this
             };
             popup.ShowDialog();
+
+            UpdateAllInformation();
             UnloadExecutable();
         }
 

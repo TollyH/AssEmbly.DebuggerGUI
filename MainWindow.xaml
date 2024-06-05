@@ -19,6 +19,11 @@
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Padding="0" ToolTip="Import ADI File">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/script-import.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <Separator/>
             <MenuItem Padding="0" ToolTip="Stop" Click="StopItem_Click">
                 <MenuItem.Icon>
@@ -58,30 +63,41 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Create Breakpoint">
+            <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Save Address">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Padding="0" ToolTip="Create Label">
+            <MenuItem Padding="0" ToolTip="Create Label From Program Position">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/tag--plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/bandaid.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <Separator/>
+            <MenuItem Padding="0" ToolTip="Save Selected Memory Address">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Edit Memory at Selected Address">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/memory-pencil.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Edit Registers">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/drawer--pencil.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Padding="0" ToolTip="Edit Status Flags">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/flag--pencil.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Padding="0" ToolTip="Edit Program">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/bandaid.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
