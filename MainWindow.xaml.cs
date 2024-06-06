@@ -289,7 +289,7 @@ namespace AssEmbly.DebuggerGUI
                 // >= ' ' and <= '~'
                 else if (value is >= 32 and <= 126)
                 {
-                    blockExtra.Text = $"'{(char)value}'";
+                    blockExtra.Text = $"'{((char)value).EscapeCharacter()}'";
                 }
                 else
                 {
