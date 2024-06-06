@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace AssEmbly.DebuggerGUI
@@ -25,13 +26,30 @@ namespace AssEmbly.DebuggerGUI
             messageText.Text = message;
             dialogImage.Source = new BitmapImage(new Uri(image));
 
-            inputBox.Visibility = showInputBox ? Visibility.Visible : Visibility.Collapsed;
+            if (showInputBox)
+            {
+                inputBox.Visibility = Visibility.Visible;
+                inputBox.Focus();
+            }
+            else
+            {
+                inputBox.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
             Close();
+        }
+
+        private void inputBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                DialogResult = true;
+                Close();
+            }
         }
     }
 }
