@@ -23,6 +23,7 @@ namespace AssEmbly.DebuggerGUI
         public Processor? DebuggingProcessor { get; private set; }
 
         private readonly HashSet<IBreakpoint> breakpoints = new();
+        private readonly Dictionary<string, ulong> labels = new();
 
         private string? lastOpenedPath;
 
@@ -90,11 +91,7 @@ namespace AssEmbly.DebuggerGUI
             }
             catch (Exception exc)
             {
-                DialogPopup popup = new(exc.Message, "Error loading executable", DialogPopup.ErrorIcon)
-                {
-                    Owner = this
-                };
-                popup.ShowDialog();
+                ShowErrorDialog(exc.Message, "Error loading executable");
                 return;
             }
 
@@ -102,11 +99,7 @@ namespace AssEmbly.DebuggerGUI
 
             if (!ulong.TryParse(memorySizeInput.Text, out ulong memorySize))
             {
-                DialogPopup popup = new("Entered memory size is not valid.", "Error creating processor", DialogPopup.ErrorIcon)
-                {
-                    Owner = this
-                };
-                popup.ShowDialog();
+                ShowErrorDialog("Entered memory size is not valid.", "Error creating processor");
                 return;
             }
 
@@ -122,11 +115,7 @@ namespace AssEmbly.DebuggerGUI
             }
             catch (Exception exc)
             {
-                DialogPopup popup = new(exc.Message, "Error creating processor", DialogPopup.ErrorIcon)
-                {
-                    Owner = this
-                };
-                popup.ShowDialog();
+                ShowErrorDialog(exc.Message, "Error creating processor");
                 return;
             }
 
@@ -138,6 +127,44 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
             ReloadDisassembly();
             DisassembleFromProgramOffset(executable.EntryPoint);
+        }
+
+        public void LoadADI(string path)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            try
+            {
+                DebugInfo.DebugInfoFile infoFile = DebugInfo.ParseDebugInfoFile(File.ReadAllText(path));
+
+                // Convert Dict<ulong, string[]> to Dict<string, ulong>,
+                // where the same address can now appear multiple times, mapped against unique names
+                foreach ((ulong address, string[] names) in infoFile.AddressLabels)
+                {
+                    foreach (string name in names)
+                    {
+                        labels[name] = address;
+                    }
+                }
+
+                disassembledLines.Clear();
+                disassembledAddresses.Clear();
+
+                foreach ((ulong address, _) in infoFile.AssembledInstructions.OrderBy(kv => kv.Key))
+                {
+                    DisassembleFromProgramOffset(address);
+                }
+            }
+            catch (Exception exc)
+            {
+                ShowErrorDialog(exc.Message, "Error loading debug information file");
+                return;
+            }
+
+            UpdateAllInformation();
         }
 
         private void ReloadDisassemblyAfterPosition(int start)
@@ -197,14 +224,14 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        public void DisassembleFromProgramOffset(ulong offset)
+        public void DisassembleFromProgramOffset(ulong offset, bool force = false)
         {
             if (DebuggingProcessor is null)
             {
                 return;
             }
 
-            if (disassembledLines.ContainsKey(offset))
+            if (!force && disassembledLines.ContainsKey(offset))
             {
                 // The given offset was already considered to be the start of an instruction,
                 // no further disassembly is required.
@@ -259,6 +286,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateRegistersView();
             UpdateDisassemblyView();
             UpdateBreakpointListView();
+            UpdateLabelListView();
         }
 
         public void UpdateRegistersView()
@@ -328,12 +356,14 @@ namespace AssEmbly.DebuggerGUI
                 {
                     programBreakpointsPanel.Children[i].Visibility = Visibility.Collapsed;
                     programLinesPanel.Children[i].Visibility = Visibility.Collapsed;
+                    programLabelsPanel.Children[i].Visibility = Visibility.Collapsed;
                     programCodePanel.Children[i].Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     programBreakpointsPanel.Children[i].Visibility = Visibility.Visible;
                     programLinesPanel.Children[i].Visibility = Visibility.Visible;
+                    programLabelsPanel.Children[i].Visibility = Visibility.Visible;
                     programCodePanel.Children[i].Visibility = Visibility.Visible;
 
                     Range addressRange = disassembledAddresses[startAddressIndex + i];
@@ -348,9 +378,23 @@ namespace AssEmbly.DebuggerGUI
                         ? Brushes.LightCoral
                         : Brushes.White;
 
-                    // TODO: Show referenced label names
+                    TextBlock labelsBlock = (TextBlock)programLabelsPanel.Children[i];
+                    labelsBlock.Text = "";
+                    foreach ((string name, _) in labels.Where(l => l.Value == (ulong)addressRange.Start))
+                    {
+                        labelsBlock.Text += $":{name} ";
+                    }
+
                     // TODO: Syntax highlighting
-                    ((TextBlock)programCodePanel.Children[i]).Text = disassembledLines[(ulong)addressRange.Start].Line;
+                    TextBlock codeBlock = (TextBlock)programCodePanel.Children[i];
+                    codeBlock.Text = disassembledLines[(ulong)addressRange.Start].Line;
+                    foreach (ulong referencedAddress in disassembledLines[(ulong)addressRange.Start].References)
+                    {
+                        foreach (string label in labels.Where(kv => kv.Value == referencedAddress).Select(kv => kv.Key))
+                        {
+                            codeBlock.Text += $"  ; 0x{referencedAddress:X} -> :{label}";
+                        }
+                    }
                 }
             }
         }
@@ -388,10 +432,45 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateLabelListView()
+        {
+            labelsListNames.Children.Clear();
+            labelsListAddresses.Children.Clear();
+            foreach ((string name, ulong address) in labels.OrderBy(l => l.Value))
+            {
+                ContextMenus.LabelListContextMenu contextMenu = new(name);
+                contextMenu.LabelRemoved += ContextMenu_LabelRemoved;
+                contextMenu.LabelAdded += ContextMenu_LabelAdded;
+                contextMenu.LabelDisassembling += ContextMenu_LabelDisassembling;
+
+                labelsListNames.Children.Add(new TextBlock()
+                {
+                    Text = name,
+                    Foreground = Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                labelsListAddresses.Children.Add(new TextBlock()
+                {
+                    Text = address.ToString("X16"),
+                    Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
+                        ? Brushes.LightCoral
+                        : Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
         public void ReloadDisassemblyView()
         {
             programBreakpointsPanel.Children.Clear();
             programLinesPanel.Children.Clear();
+            programLabelsPanel.Children.Clear();
             programCodePanel.Children.Clear();
 
             int lineCount = (int)(programCodePanel.ActualHeight / lineHeight);
@@ -412,6 +491,16 @@ namespace AssEmbly.DebuggerGUI
                     HorizontalAlignment = HorizontalAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 5, 0),
+                    FontFamily = codeFont,
+                    Height = lineHeight,
+                    FontSize = 14
+                });
+                programLabelsPanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.LightBlue,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
                     FontSize = 14
@@ -467,6 +556,28 @@ namespace AssEmbly.DebuggerGUI
             GC.SuppressFinalize(this);
         }
 
+        private void CreateLabelPromptName(ulong address)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            string? name = AskString("Enter the name of the new label", "New Label");
+            if (name is null)
+            {
+                return;
+            }
+
+            if (!labels.TryAdd(name, address))
+            {
+                ShowErrorDialog($"A label with the name \"{name}\" already exists", "Label Creation Failed");
+                return;
+            }
+
+            UpdateLabelListView();
+        }
+
         private void OnBreak(BackgroundRunner sender, bool halt)
         {
             if (DebuggingProcessor is null || !ReferenceEquals(processorRunner, sender))
@@ -491,15 +602,19 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            DialogPopup popup = new($"{exception.GetType()}: {exception.Message}",
-                "AssEmbly Exception", DialogPopup.ErrorIcon)
+            ShowErrorDialog($"{exception.GetType()}: {exception.Message}", "AssEmbly Exception");
+
+            UpdateAllInformation();
+            UnloadExecutable();
+        }
+
+        private void ShowErrorDialog(string message, string title)
+        {
+            DialogPopup popup = new(message, title, DialogPopup.ErrorIcon)
             {
                 Owner = this
             };
             popup.ShowDialog();
-
-            UpdateAllInformation();
-            UnloadExecutable();
         }
 
         private long? AskHexadecimalNumber(string message, string title)
@@ -520,14 +635,24 @@ namespace AssEmbly.DebuggerGUI
             }
             catch (Exception exception)
             {
-                popup = new DialogPopup("The entered value was invalid.\n" + exception.Message,
-                    "Invalid Value", DialogPopup.ErrorIcon)
-                {
-                    Owner = this
-                };
-                popup.ShowDialog();
+                ShowErrorDialog("The entered value was invalid.\n" + exception.Message, "Invalid Value");
                 return null;
             }
+        }
+
+        private string? AskString(string message, string title)
+        {
+            DialogPopup popup = new(message, title, DialogPopup.QuestionIcon, true)
+            {
+                Owner = this
+            };
+
+            if (!(popup.ShowDialog() ?? false))
+            {
+                return null;
+            }
+
+            return popup.InputText;
         }
 
         private void AboutItem_Click(object sender, RoutedEventArgs e)
@@ -642,16 +767,22 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
             _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
-            UpdateDisassemblyView();
-            UpdateBreakpointListView();
+            UpdateAllInformation();
         }
 
         private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (mainTabControl.SelectedIndex == 1)
+            switch (mainTabControl.SelectedIndex)
             {
-                // Breakpoint tab selected
-                UpdateBreakpointListView();
+                case 0:  // Program tab
+                    UpdateDisassemblyView();
+                    break;
+                case 1:  // Breakpoint tab
+                    UpdateBreakpointListView();
+                    break;
+                case 3:  // Labels tab
+                    UpdateLabelListView();
+                    break;
             }
         }
 
@@ -659,7 +790,6 @@ namespace AssEmbly.DebuggerGUI
         {
             _ = breakpoints.Remove(sender.Breakpoint);
             UpdateBreakpointListView();
-            UpdateDisassemblyView();
         }
 
         private void ContextMenu_BreakpointAdded(ContextMenus.BreakpointListContextMenu sender)
@@ -676,7 +806,88 @@ namespace AssEmbly.DebuggerGUI
             }
             _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, (ulong)value.Value));
             UpdateBreakpointListView();
-            UpdateDisassemblyView();
+        }
+
+        private void ADIItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            OpenFileDialog dialog = new()
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "AssEmbly Debug Information (*.adi)|*.adi",
+                Title = "Open Debug Information File"
+            };
+            if (dialog.ShowDialog(this) ?? false)
+            {
+                LoadADI(dialog.FileName);
+            }
+        }
+
+        private void ContextMenu_LabelAdded(ContextMenus.LabelListContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the address to add label to in hexadecimal", "New Label");
+            if (value is null)
+            {
+                return;
+            }
+
+            CreateLabelPromptName((ulong)value);
+        }
+
+        private void ContextMenu_LabelRemoved(ContextMenus.LabelListContextMenu sender)
+        {
+            _ = labels.Remove(sender.LabelName);
+            UpdateLabelListView();
+        }
+
+        private void LabelItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            CreateLabelPromptName(DebuggingProcessor.Registers[(int)Register.rpo]);
+
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_LabelDisassembling(ContextMenus.LabelListContextMenu sender)
+        {
+            if (labels.TryGetValue(sender.LabelName, out ulong address))
+            {
+                DisassembleFromProgramOffset(address, true);
+            }
+        }
+
+        private void DisassemblePartialItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo], true);
+        }
+
+        private void DisassembleFullItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            ReloadDisassembly();
         }
     }
 }

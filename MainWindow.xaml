@@ -20,7 +20,7 @@
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Import ADI File">
+            <MenuItem Padding="0" ToolTip="Import ADI File" Click="ADIItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/script-import.png"/>
                 </MenuItem.Icon>
@@ -69,7 +69,7 @@
                     <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Create Label From Program Position">
+            <MenuItem Padding="0" ToolTip="Create Label From Program Position" Click="LabelItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/tag--plus.png"/>
                 </MenuItem.Icon>
@@ -77,6 +77,17 @@
             <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/bandaid.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Padding="0" ToolTip="Trigger Disassembly from Current Position" Click="DisassemblePartialItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/compile.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Trigger Disassembly of Whole Program" Click="DisassembleFullItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/compile-error.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
@@ -126,15 +137,18 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="20"/>
                             <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" BorderBrush="#7F000000" BorderThickness="0,0,1,0">
-                            <StackPanel x:Name="programBreakpointsPanel" Background="#26FFFFFF"/>
+                        <StackPanel x:Name="programBreakpointsPanel" Grid.Column="0" Background="#26FFFFFF"/>
+                        <Border Grid.Column="1" BorderBrush="#7F000000" BorderThickness="1,0">
+                            <StackPanel x:Name="programLinesPanel" Background="#26FFFFFF"/>
                         </Border>
-                        <StackPanel x:Name="programLinesPanel" Grid.Column="1" Background="#26FFFFFF"/>
-                        <StackPanel x:Name="programCodePanel" Grid.Column="2"/>
-                        <ScrollBar x:Name="programScroll" Grid.Column="3" SmallChange="1" Scroll="programScroll_Scroll"/>
+                        <StackPanel x:Name="programLabelsPanel" Grid.Column="2"/>
+                        <GridSplitter Grid.Column="2" ResizeDirection="Columns" Width="2" Background="#44000000"/>
+                        <StackPanel x:Name="programCodePanel" Grid.Column="3"/>
+                        <ScrollBar x:Name="programScroll" Grid.Column="4" SmallChange="1" Scroll="programScroll_Scroll"/>
                     </Grid>
                 </TabItem>
                 <TabItem>
@@ -176,6 +190,22 @@
                             <TextBlock Text="Labels" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ContextMenu>
+                                <menu:LabelListContextMenu LabelAdded="ContextMenu_LabelAdded"/>
+                            </Grid.ContextMenu>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Name" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="labelsListNames" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="labelsListAddresses" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
