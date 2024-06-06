@@ -18,7 +18,7 @@ namespace AssEmbly.DebuggerGUI
         /// </summary>
         /// <returns><see langword="true"/> if execution started, or <see langword="false"/> if the runner is already busy.</returns>
         public bool ExecuteUntilBreak(ExecutionBreakCallback breakCallback, ExceptionCallback exceptionCallback,
-            List<Predicate<Processor>> breakConditions, CancellationToken cancellationToken)
+            IEnumerable<IBreakpoint> breakConditions, CancellationToken cancellationToken)
         {
             if (executionThread is not null)
             {
@@ -26,15 +26,22 @@ namespace AssEmbly.DebuggerGUI
                 return false;
             }
 
+            IBreakpoint[] breakpoints = breakConditions.ToArray();
+
             executionThread = new Thread(() =>
             {
                 try
                 {
                     bool halt = false;
-                    while (!halt && !breakConditions.Any(c => c(DebuggingProcessor))
-                        && !cancellationToken.IsCancellationRequested)
+                    while (!halt && !cancellationToken.IsCancellationRequested)
                     {
                         halt = DebuggingProcessor.Execute(false, stdout, stdin, false);
+                        // This check shouldn't run for the first instruction
+                        // so that we don't break on a breakpoint we just continued from
+                        if (breakpoints.Any(b => b.ShouldBreak(DebuggingProcessor)))
+                        {
+                            break;
+                        }
                     }
                     CallbackDispatcher.Invoke(() => breakCallback(this, halt));
                 }

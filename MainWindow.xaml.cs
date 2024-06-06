@@ -22,6 +22,8 @@ namespace AssEmbly.DebuggerGUI
     {
         public Processor? DebuggingProcessor { get; private set; }
 
+        private readonly HashSet<IBreakpoint> breakpoints = new();
+
         private string? lastOpenedPath;
 
         private CancellationTokenSource cancellationTokenSource = new();
@@ -246,6 +248,7 @@ namespace AssEmbly.DebuggerGUI
             processorRunner = null;
 
             BreakExecution();
+            breakpoints.Clear();
 
             UpdateRunningState(RunningState.Stopped);
             executablePathText.Text = "No executable loaded";
@@ -324,8 +327,15 @@ namespace AssEmbly.DebuggerGUI
             int lineCount = (int)(programCodePanel.ActualHeight / lineHeight);
             for (int i = 0; i < lineCount; i++)
             {
-                // TODO: Clickable breakpoints
-                programBreakpointsPanel.Children.Add(new UIElement());
+                BreakpointButton breakpointButton = new()
+                {
+                    Height = lineHeight,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                breakpointButton.Checked += BreakpointButton_Checked;
+                breakpointButton.Unchecked += BreakpointButton_Unchecked;
+                programBreakpointsPanel.Children.Add(breakpointButton);
                 programLinesPanel.Children.Add(new TextBlock()
                 {
                     Foreground = Brushes.White,
@@ -371,11 +381,17 @@ namespace AssEmbly.DebuggerGUI
                     programCodePanel.Children[i].Visibility = Visibility.Visible;
 
                     Range addressRange = disassembledAddresses[startAddressIndex + i];
+
+                    BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
+                    breakpointButton.Address = (ulong)addressRange.Start;
+                    breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
+
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
                     lineBlock.Text = addressRange.Start.ToString("X16");
                     lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White;
+
                     // TODO: Show referenced label names
                     // TODO: Syntax highlighting
                     ((TextBlock)programCodePanel.Children[i]).Text = disassembledLines[(ulong)addressRange.Start].Line;
@@ -533,10 +549,20 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, new List<Predicate<Processor>>(), cancellationTokenSource.Token))
+            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, breakpoints, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
+        }
+
+        private void BreakpointButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _ = breakpoints.Remove(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
+        }
+
+        private void BreakpointButton_Checked(object sender, RoutedEventArgs e)
+        {
+            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
         }
     }
 }

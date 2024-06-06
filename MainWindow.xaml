@@ -291,6 +291,14 @@
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/drawer--record.png"/>
+                            <TextBlock Text="Register Watch" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/system-monitor.png"/>
                             <TextBlock Text="Status" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
@@ -310,6 +318,14 @@
                         <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/memory.png"/>
                             <TextBlock Text="Memory" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/memory-record.png"/>
+                            <TextBlock Text="Memory Watch" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>

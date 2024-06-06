@@ -126,6 +126,7 @@ namespace AssEmbly.DebuggerGUI
                 EmptyReadAttempt = true;
                 return -1;
             }
+            EmptyReadAttempt = false;
 
             if (utf8Buffer.TryDequeue(out byte result))
             {
