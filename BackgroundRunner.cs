@@ -11,6 +11,8 @@ namespace AssEmbly.DebuggerGUI
         public Processor DebuggingProcessor { get; } = processor;
         public Dispatcher CallbackDispatcher { get; } = callbackDispatcher;
 
+        public bool IsBusy => executionThread is not null;
+
         private Thread? executionThread;
 
         /// <summary>
@@ -20,9 +22,8 @@ namespace AssEmbly.DebuggerGUI
         public bool ExecuteUntilBreak(ExecutionBreakCallback breakCallback, ExceptionCallback exceptionCallback,
             IEnumerable<IBreakpoint> breakConditions, CancellationToken cancellationToken)
         {
-            if (executionThread is not null)
+            if (IsBusy)
             {
-                // Already busy
                 return false;
             }
 

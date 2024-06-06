@@ -258,6 +258,7 @@ namespace AssEmbly.DebuggerGUI
         {
             UpdateRegistersView();
             UpdateDisassemblyView();
+            UpdateBreakpointListView();
         }
 
         public void UpdateRegistersView()
@@ -318,6 +319,75 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateDisassemblyView()
+        {
+            int startAddressIndex = (int)programScroll.Value;
+            for (int i = 0; i < programCodePanel.Children.Count; i++)
+            {
+                if (startAddressIndex + i >= disassembledAddresses.Count)
+                {
+                    programBreakpointsPanel.Children[i].Visibility = Visibility.Collapsed;
+                    programLinesPanel.Children[i].Visibility = Visibility.Collapsed;
+                    programCodePanel.Children[i].Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    programBreakpointsPanel.Children[i].Visibility = Visibility.Visible;
+                    programLinesPanel.Children[i].Visibility = Visibility.Visible;
+                    programCodePanel.Children[i].Visibility = Visibility.Visible;
+
+                    Range addressRange = disassembledAddresses[startAddressIndex + i];
+
+                    BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
+                    breakpointButton.Address = (ulong)addressRange.Start;
+                    breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
+
+                    TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
+                    lineBlock.Text = addressRange.Start.ToString("X16");
+                    lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
+                        ? Brushes.LightCoral
+                        : Brushes.White;
+
+                    // TODO: Show referenced label names
+                    // TODO: Syntax highlighting
+                    ((TextBlock)programCodePanel.Children[i]).Text = disassembledLines[(ulong)addressRange.Start].Line;
+                }
+            }
+        }
+
+        public void UpdateBreakpointListView()
+        {
+            breakpointListAddresses.Children.Clear();
+            breakpointListSourceLines.Children.Clear();
+            foreach (RegisterValueBreakpoint breakpoint in breakpoints.OfType<RegisterValueBreakpoint>().OrderBy(b => b.TargetValue))
+            {
+                ContextMenus.BreakpointListContextMenu contextMenu = new(breakpoint);
+                contextMenu.BreakpointRemoved += ContextMenu_BreakpointRemoved;
+                contextMenu.BreakpointAdded += ContextMenu_BreakpointAdded;
+
+                breakpointListAddresses.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint.TargetValue.ToString("X16"),
+                    Foreground = breakpoint.TargetValue == DebuggingProcessor?.Registers[(int)Register.rpo]
+                        ? Brushes.LightCoral
+                        : Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                breakpointListSourceLines.Children.Add(new TextBlock()
+                {
+                    Text = disassembledLines.GetValueOrDefault(breakpoint.TargetValue).Line,
+                    Foreground = Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
         public void ReloadDisassemblyView()
         {
             programBreakpointsPanel.Children.Clear();
@@ -361,42 +431,6 @@ namespace AssEmbly.DebuggerGUI
             programScroll.ViewportSize = lineCount;
 
             UpdateDisassemblyView();
-        }
-
-        public void UpdateDisassemblyView()
-        {
-            int startAddressIndex = (int)programScroll.Value;
-            for (int i = 0; i < programCodePanel.Children.Count; i++)
-            {
-                if (startAddressIndex + i >= disassembledAddresses.Count)
-                {
-                    programBreakpointsPanel.Children[i].Visibility = Visibility.Collapsed;
-                    programLinesPanel.Children[i].Visibility = Visibility.Collapsed;
-                    programCodePanel.Children[i].Visibility = Visibility.Collapsed;
-                }
-                else
-                {
-                    programBreakpointsPanel.Children[i].Visibility = Visibility.Visible;
-                    programLinesPanel.Children[i].Visibility = Visibility.Visible;
-                    programCodePanel.Children[i].Visibility = Visibility.Visible;
-
-                    Range addressRange = disassembledAddresses[startAddressIndex + i];
-
-                    BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
-                    breakpointButton.Address = (ulong)addressRange.Start;
-                    breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
-
-                    TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
-                    lineBlock.Text = addressRange.Start.ToString("X16");
-                    lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
-                        ? Brushes.LightCoral
-                        : Brushes.White;
-
-                    // TODO: Show referenced label names
-                    // TODO: Syntax highlighting
-                    ((TextBlock)programCodePanel.Children[i]).Text = disassembledLines[(ulong)addressRange.Start].Line;
-                }
-            }
         }
 
         public void UpdateRunningState(RunningState state)
@@ -466,6 +500,34 @@ namespace AssEmbly.DebuggerGUI
 
             UpdateAllInformation();
             UnloadExecutable();
+        }
+
+        private long? AskHexadecimalNumber(string message, string title)
+        {
+            DialogPopup popup = new(message, title, DialogPopup.QuestionIcon, true)
+            {
+                Owner = this
+            };
+
+            if (!(popup.ShowDialog() ?? false))
+            {
+                return null;
+            }
+
+            try
+            {
+                return Convert.ToInt64(popup.InputText, 16);
+            }
+            catch (Exception exception)
+            {
+                popup = new DialogPopup("The entered value was invalid.\n" + exception.Message,
+                    "Invalid Value", DialogPopup.ErrorIcon)
+                {
+                    Owner = this
+                };
+                popup.ShowDialog();
+                return null;
+            }
         }
 
         private void AboutItem_Click(object sender, RoutedEventArgs e)
@@ -557,12 +619,64 @@ namespace AssEmbly.DebuggerGUI
 
         private void BreakpointButton_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
             _ = breakpoints.Remove(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
         }
 
         private void BreakpointButton_Checked(object sender, RoutedEventArgs e)
         {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
             _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
+        }
+
+        private void BreakpointItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
+            UpdateDisassemblyView();
+            UpdateBreakpointListView();
+        }
+
+        private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (mainTabControl.SelectedIndex == 1)
+            {
+                // Breakpoint tab selected
+                UpdateBreakpointListView();
+            }
+        }
+
+        private void ContextMenu_BreakpointRemoved(ContextMenus.BreakpointListContextMenu sender)
+        {
+            _ = breakpoints.Remove(sender.Breakpoint);
+            UpdateBreakpointListView();
+            UpdateDisassemblyView();
+        }
+
+        private void ContextMenu_BreakpointAdded(ContextMenus.BreakpointListContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the address to break on in hexadecimal", "New Breakpoint");
+            if (value is null)
+            {
+                return;
+            }
+            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, (ulong)value.Value));
+            UpdateBreakpointListView();
+            UpdateDisassemblyView();
         }
     }
 }

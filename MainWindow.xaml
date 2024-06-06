@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
+        xmlns:menu="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
         mc:Ignorable="d"
         Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
     <Grid>
@@ -63,7 +64,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position">
+            <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position" Click="BreakpointItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>
                 </MenuItem.Icon>
@@ -113,7 +114,7 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#BF000000"/>
-            <TabControl Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}">
+            <TabControl x:Name="mainTabControl" Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}" SelectionChanged="MainTabControl_SelectionChanged">
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
@@ -143,6 +144,22 @@
                             <TextBlock Text="Breakpoints" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ContextMenu>
+                                <menu:BreakpointListContextMenu BreakpointAdded="ContextMenu_BreakpointAdded"/>
+                            </Grid.ContextMenu>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Source Line" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="breakpointListAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="breakpointListSourceLines" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
