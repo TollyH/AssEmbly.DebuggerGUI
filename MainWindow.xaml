@@ -91,7 +91,7 @@
                     <Image Source="pack://application:,,,/Icons/tag--plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position">
+            <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position" Click="PatchItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/bandaid.png"/>
                 </MenuItem.Icon>

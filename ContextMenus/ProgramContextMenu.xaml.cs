@@ -16,6 +16,7 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? AddressSaved;
         public event EventDelegate? BreakpointToggled;
         public event EventDelegate? Jumped;
+        public event EventDelegate? Edited;
 
         public ProgramContextMenu()
         {
@@ -50,6 +51,11 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void JumpItem_Click(object sender, RoutedEventArgs e)
         {
             Jumped?.Invoke(this);
+        }
+
+        private void EditItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edited?.Invoke(this);
         }
     }
 }

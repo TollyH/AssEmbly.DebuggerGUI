@@ -412,6 +412,7 @@ namespace AssEmbly.DebuggerGUI
                     contextMenu.LabelAdded += ContextMenu_LabelAddedFromProgram;
                     contextMenu.Jumped += ContextMenu_Jumped;
                     contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
+                    contextMenu.Edited += ContextMenu_Edited;
 
                     TextBlock bytesBlock = (TextBlock)programBytesPanel.Children[i];
                     bytesBlock.Visibility = Visibility.Visible;
@@ -700,6 +701,52 @@ namespace AssEmbly.DebuggerGUI
             savedAddresses[address] = name;
 
             UpdateSavedAddressListView();
+        }
+
+        private void PromptInstructionPatch(ulong address)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            string currentLine;
+            ulong instructionSize;
+            if (disassembledLines.TryGetValue(address, out (string Line, List<ulong> References) line))
+            {
+                currentLine = line.Line;
+                instructionSize = (ulong)disassembledAddresses.First(a => a.Start == (long)address).Length;
+            }
+            else
+            {
+                (currentLine, instructionSize, _, _) = Disassembler.DisassembleInstruction(
+                    DebuggingProcessor.Memory.AsSpan((int)address), disassemblerOptions, false);
+            }
+
+            int proceedingNops = 0;
+            while ((int)(address + instructionSize) + proceedingNops < DebuggingProcessor.Memory.Length
+                && DebuggingProcessor.Memory[(int)(address + instructionSize) + proceedingNops] == 0x01)
+            {
+                proceedingNops++;
+            }
+
+            PatchDialog dialog = new(currentLine, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
+            {
+                Owner = this
+            };
+            if (!(dialog.ShowDialog() ?? false) || dialog.AssemblyResult == PatchDialog.ResultType.Fail)
+            {
+                return;
+            }
+
+            dialog.AssembledBytes.CopyTo(DebuggingProcessor.Memory, (long)address);
+            for (int i = dialog.AssembledBytes.Length; i < (int)instructionSize; i++)
+            {
+                DebuggingProcessor.Memory[(int)address + i] = 0x01;  // NOP
+            }
+
+            DisassembleFromProgramOffset(address, true);
+            UpdateAllInformation();
         }
 
         private void OnBreak(BackgroundRunner sender, bool halt)
@@ -1144,6 +1191,30 @@ namespace AssEmbly.DebuggerGUI
             }
 
             SaveAddressPromptName(sender.Address);
+
+            UpdateAllInformation();
+        }
+
+        private void PatchItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            PromptInstructionPatch(DebuggingProcessor.Registers[(int)Register.rpo]);
+
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_Edited(ContextMenus.ProgramContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            PromptInstructionPatch(sender.Address);
 
             UpdateAllInformation();
         }

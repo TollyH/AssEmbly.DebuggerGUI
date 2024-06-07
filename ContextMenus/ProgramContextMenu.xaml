@@ -25,6 +25,11 @@
         </MenuItem.Icon>
     </MenuItem>
     <Separator/>
+    <MenuItem Header="Edit Program" Click="EditItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/bandaid.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
     <MenuItem Header="Jump Here" Click="JumpItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/control-skip-270.png"/>
