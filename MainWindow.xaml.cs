@@ -276,6 +276,7 @@ namespace AssEmbly.DebuggerGUI
 
             BreakExecution();
             breakpoints.Clear();
+            labels.Clear();
 
             UpdateRunningState(RunningState.Stopped);
             executablePathText.Text = "No executable loaded";
@@ -349,11 +350,17 @@ namespace AssEmbly.DebuggerGUI
 
         public void UpdateDisassemblyView()
         {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
             int startAddressIndex = (int)programScroll.Value;
             for (int i = 0; i < programCodePanel.Children.Count; i++)
             {
                 if (startAddressIndex + i >= disassembledAddresses.Count)
                 {
+                    programBytesPanel.Children[i].Visibility = Visibility.Collapsed;
                     programBreakpointsPanel.Children[i].Visibility = Visibility.Collapsed;
                     programLinesPanel.Children[i].Visibility = Visibility.Collapsed;
                     programLabelsPanel.Children[i].Visibility = Visibility.Collapsed;
@@ -361,24 +368,30 @@ namespace AssEmbly.DebuggerGUI
                 }
                 else
                 {
-                    programBreakpointsPanel.Children[i].Visibility = Visibility.Visible;
-                    programLinesPanel.Children[i].Visibility = Visibility.Visible;
-                    programLabelsPanel.Children[i].Visibility = Visibility.Visible;
-                    programCodePanel.Children[i].Visibility = Visibility.Visible;
-
                     Range addressRange = disassembledAddresses[startAddressIndex + i];
 
+                    TextBlock bytesBlock = (TextBlock)programBytesPanel.Children[i];
+                    bytesBlock.Visibility = Visibility.Visible;
+                    bytesBlock.Text = "";
+                    foreach (byte programByte in DebuggingProcessor!.Memory.AsSpan((int)addressRange.Start, (int)addressRange.Length))
+                    {
+                        bytesBlock.Text += $"{programByte:X2} ";
+                    }
+
                     BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
+                    breakpointButton.Visibility = Visibility.Visible;
                     breakpointButton.Address = (ulong)addressRange.Start;
                     breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
 
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
+                    lineBlock.Visibility = Visibility.Visible;
                     lineBlock.Text = addressRange.Start.ToString("X16");
                     lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White;
 
                     TextBlock labelsBlock = (TextBlock)programLabelsPanel.Children[i];
+                    labelsBlock.Visibility = Visibility.Visible;
                     labelsBlock.Text = "";
                     foreach ((string name, _) in labels.Where(l => l.Value == (ulong)addressRange.Start))
                     {
@@ -387,6 +400,7 @@ namespace AssEmbly.DebuggerGUI
 
                     // TODO: Syntax highlighting
                     TextBlock codeBlock = (TextBlock)programCodePanel.Children[i];
+                    codeBlock.Visibility = Visibility.Visible;
                     codeBlock.Text = disassembledLines[(ulong)addressRange.Start].Line;
                     foreach (ulong referencedAddress in disassembledLines[(ulong)addressRange.Start].References)
                     {
@@ -468,6 +482,7 @@ namespace AssEmbly.DebuggerGUI
 
         public void ReloadDisassemblyView()
         {
+            programBytesPanel.Children.Clear();
             programBreakpointsPanel.Children.Clear();
             programLinesPanel.Children.Clear();
             programLabelsPanel.Children.Clear();
@@ -485,6 +500,16 @@ namespace AssEmbly.DebuggerGUI
                 breakpointButton.Checked += BreakpointButton_Checked;
                 breakpointButton.Unchecked += BreakpointButton_Unchecked;
                 programBreakpointsPanel.Children.Add(breakpointButton);
+                programBytesPanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.Gray,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 5, 0),
+                    FontFamily = codeFont,
+                    Height = lineHeight,
+                    FontSize = 12
+                });
                 programLinesPanel.Children.Add(new TextBlock()
                 {
                     Foreground = Brushes.White,
