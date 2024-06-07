@@ -96,7 +96,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Save Selected Memory Address">
+            <MenuItem Padding="0" ToolTip="Save Selected Memory Address" Click="SaveAddressItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
                 </MenuItem.Icon>
@@ -367,7 +367,7 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#BF000000"/>
-            <TabControl Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}">
+            <TabControl x:Name="memoryTabControl" Grid.Column="0" Background="{x:Null}" BorderBrush="{x:Null}" SelectionChanged="MemoryTabControl_SelectionChanged">
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
@@ -391,6 +391,22 @@
                             <TextBlock Text="Saved Addresses" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ContextMenu>
+                                <menu:SavedAddressListContextMenu AddressAdded="ContextMenu_AddressAdded"/>
+                            </Grid.ContextMenu>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Description" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="savedAddressListAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="savedAddressListDescriptions" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>

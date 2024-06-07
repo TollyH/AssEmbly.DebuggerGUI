@@ -22,8 +22,11 @@ namespace AssEmbly.DebuggerGUI
     {
         public Processor? DebuggingProcessor { get; private set; }
 
+        public ulong SelectedMemoryAddress { get; private set; } = 0;
+
         private readonly HashSet<IBreakpoint> breakpoints = new();
         private readonly Dictionary<string, ulong> labels = new();
+        private readonly Dictionary<ulong, string> savedAddresses = new();
 
         private string? lastOpenedPath;
 
@@ -307,6 +310,9 @@ namespace AssEmbly.DebuggerGUI
             BreakExecution();
             breakpoints.Clear();
             labels.Clear();
+            savedAddresses.Clear();
+
+            SelectedMemoryAddress = 0;
 
             UpdateRunningState(RunningState.Stopped);
             executablePathText.Text = "No executable loaded";
@@ -318,6 +324,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateDisassemblyView();
             UpdateBreakpointListView();
             UpdateLabelListView();
+            UpdateSavedAddressListView();
         }
 
         public void UpdateRegistersView()
@@ -510,6 +517,39 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateSavedAddressListView()
+        {
+            savedAddressListAddresses.Children.Clear();
+            savedAddressListDescriptions.Children.Clear();
+            foreach ((ulong address, string description) in savedAddresses.OrderBy(l => l.Key))
+            {
+                ContextMenus.SavedAddressListContextMenu contextMenu = new(address);
+                contextMenu.AddressRemoved += ContextMenu_AddressRemoved;
+                contextMenu.AddressAdded += ContextMenu_AddressAdded;
+
+                savedAddressListAddresses.Children.Add(new TextBlock()
+                {
+                    Text = address.ToString("X16"),
+                    Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
+                        ? Brushes.LightCoral
+                        : Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                savedAddressListDescriptions.Children.Add(new TextBlock()
+                {
+                    Text = description,
+                    Foreground = Brushes.White,
+                    FontSize = 14,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
         public void ReloadDisassemblyView()
         {
             programBytesPanel.Children.Clear();
@@ -631,6 +671,24 @@ namespace AssEmbly.DebuggerGUI
             }
 
             UpdateLabelListView();
+        }
+
+        private void SaveAddressPromptName(ulong address)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            string? name = AskString("Enter a description for the saved address (optional)", "Save Address");
+            if (name is null)
+            {
+                return;
+            }
+
+            savedAddresses[address] = name;
+
+            UpdateSavedAddressListView();
         }
 
         private void OnBreak(BackgroundRunner sender, bool halt)
@@ -856,6 +914,16 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        private void MemoryTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (mainTabControl.SelectedIndex)
+            {
+                case 2:  // Saved addresses tab
+                    UpdateSavedAddressListView();
+                    break;
+            }
+        }
+
         private void ContextMenu_BreakpointRemoved(ContextMenus.BreakpointListContextMenu sender)
         {
             _ = breakpoints.Remove(sender.Breakpoint);
@@ -982,6 +1050,40 @@ namespace AssEmbly.DebuggerGUI
             {
                 UpdateRunningState(RunningState.Running);
             }
+        }
+
+        private void SaveAddressItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            SaveAddressPromptName(SelectedMemoryAddress);
+
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_AddressAdded(ContextMenus.SavedAddressListContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the address to save in hexadecimal", "Save Address");
+            if (value is null)
+            {
+                return;
+            }
+
+            SaveAddressPromptName((ulong)value);
+        }
+
+        private void ContextMenu_AddressRemoved(ContextMenus.SavedAddressListContextMenu sender)
+        {
+            _ = savedAddresses.Remove(sender.Address);
+            UpdateSavedAddressListView();
         }
     }
 }
