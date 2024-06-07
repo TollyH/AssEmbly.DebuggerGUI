@@ -366,6 +366,12 @@ namespace AssEmbly.DebuggerGUI
                 SolidColorBrush textColour = oldText == newText ? Brushes.White : Brushes.LightCoral;
                 block.Foreground = textColour;
                 blockExtra.Foreground = textColour;
+
+                block.ToolTip = $"{value} = {(long)value} = 0x{value:X} = 0b{value:B} = {floatingValue}";
+                if (value is >= 32 and <= 126)
+                {
+                    block.ToolTip += $" = '{((char)value).EscapeCharacter()}'";
+                }
             }
 
             foreach (StatusFlags flag in Enum.GetValues<StatusFlags>())
