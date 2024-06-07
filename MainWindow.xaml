@@ -20,6 +20,11 @@
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Padding="0" ToolTip="Load Raw Bytes" Click="OpenRawItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/script-binary.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Padding="0" ToolTip="Import ADI File" Click="ADIItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/script-import.png"/>

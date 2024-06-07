@@ -97,6 +97,37 @@ namespace AssEmbly.DebuggerGUI
 
             Environment.CurrentDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
 
+            LoadExecutable(executable.Program, executable.EntryPoint);
+
+            lastOpenedPath = path;
+            executablePathText.Text = path;
+
+            DisassembleFromProgramOffset(executable.EntryPoint);
+        }
+
+        public void LoadRawExecutable(string path)
+        {
+            byte[] executable;
+            try
+            {
+                executable = File.ReadAllBytes(path);
+            }
+            catch (Exception exc)
+            {
+                ShowErrorDialog(exc.Message, "Error loading executable");
+                return;
+            }
+
+            Environment.CurrentDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+
+            LoadExecutable(executable, 0);
+
+            lastOpenedPath = path;
+            executablePathText.Text = path;
+        }
+
+        public void LoadExecutable(byte[] program, ulong entryPoint)
+        {
             if (!ulong.TryParse(memorySizeInput.Text, out ulong memorySize))
             {
                 ShowErrorDialog("Entered memory size is not valid.", "Error creating processor");
@@ -107,9 +138,9 @@ namespace AssEmbly.DebuggerGUI
 
             try
             {
-                DebuggingProcessor = new Processor(memorySize, executable.EntryPoint,
+                DebuggingProcessor = new Processor(memorySize, entryPoint,
                     forceV1.IsChecked ?? false, mapStack.IsChecked ?? true, autoEcho.IsChecked ?? false);
-                DebuggingProcessor.LoadProgram(executable.Program);
+                DebuggingProcessor.LoadProgram(program);
                 processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher, consoleOutput, consoleInput);
                 UpdateRunningState(RunningState.Paused);
             }
@@ -122,11 +153,8 @@ namespace AssEmbly.DebuggerGUI
             consoleOutputBlock.Text = "";
             consoleInputBox.Text = "";
 
-            lastOpenedPath = path;
-            executablePathText.Text = path;
             UpdateAllInformation();
             ReloadDisassembly();
-            DisassembleFromProgramOffset(executable.EntryPoint);
         }
 
         public void LoadADI(string path)
@@ -695,12 +723,27 @@ namespace AssEmbly.DebuggerGUI
             {
                 CheckFileExists = true,
                 CheckPathExists = true,
-                Filter = "Assembled AssEmbly Programs (*.aap)|*.aap",
+                Filter = "Assembled AssEmbly Programs (*.aap)|*.aap|All file types|*",
                 Title = "Open Executable"
             };
             if (dialog.ShowDialog(this) ?? false)
             {
                 LoadExecutable(dialog.FileName);
+            }
+        }
+
+        private void OpenRawItem_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new()
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "All file types|*",
+                Title = "Open Raw Executable"
+            };
+            if (dialog.ShowDialog(this) ?? false)
+            {
+                LoadRawExecutable(dialog.FileName);
             }
         }
 
@@ -844,7 +887,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 CheckFileExists = true,
                 CheckPathExists = true,
-                Filter = "AssEmbly Debug Information (*.adi)|*.adi",
+                Filter = "AssEmbly Debug Information (*.adi)|*.adi|All file types|*",
                 Title = "Open Debug Information File"
             };
             if (dialog.ShowDialog(this) ?? false)
