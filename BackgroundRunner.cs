@@ -57,6 +57,88 @@ namespace AssEmbly.DebuggerGUI
         }
 
         /// <summary>
+        /// Execute the next instructions in the processor, until the next instruction inside the current subroutine or higher is reached.
+        /// </summary>
+        /// <returns><see langword="true"/> if execution started, or <see langword="false"/> if the runner is already busy.</returns>
+        public bool ExecuteOverFunction(ExecutionBreakCallback breakCallback, ExceptionCallback exceptionCallback,
+            CancellationToken cancellationToken)
+        {
+            if (IsBusy)
+            {
+                return false;
+            }
+
+            executionThread = new Thread(() =>
+            {
+                try
+                {
+                    ulong startStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                    bool halt = false;
+                    while (!halt && !cancellationToken.IsCancellationRequested)
+                    {
+                        halt = DebuggingProcessor.Execute(false, stdout, stdin, false);
+                        // This check shouldn't run for the first instruction
+                        // so that we don't break on the instruction we just continued from
+                        if (DebuggingProcessor.Registers[(int)Register.rsb] >= startStackBase)
+                        {
+                            break;
+                        }
+                    }
+                    CallbackDispatcher.Invoke(() => breakCallback(this, halt));
+                }
+                catch (Exception exc)
+                {
+                    CallbackDispatcher.Invoke(() => exceptionCallback(this, exc));
+                }
+                executionThread = null;
+            });
+            executionThread.Start();
+            return true;
+        }
+
+        /// <summary>
+        /// Execute the next instructions in the processor, until the next return instruction for the current subroutine or higher is reached.
+        /// </summary>
+        /// <returns><see langword="true"/> if execution started, or <see langword="false"/> if the runner is already busy.</returns>
+        public bool ExecuteUntilReturn(ExecutionBreakCallback breakCallback, ExceptionCallback exceptionCallback,
+            CancellationToken cancellationToken)
+        {
+            if (IsBusy)
+            {
+                return false;
+            }
+
+            executionThread = new Thread(() =>
+            {
+                try
+                {
+                    ulong startStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                    bool halt = false;
+                    while (!halt && !cancellationToken.IsCancellationRequested)
+                    {
+                        halt = DebuggingProcessor.Execute(false, stdout, stdin, false);
+                        // This check shouldn't run for the first instruction
+                        // so that we don't break on the instruction we just continued from
+                        if (DebuggingProcessor.Registers[(int)Register.rsb] >= startStackBase
+                            // Is the next instruction a return instruction?
+                            && DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE)
+                        {
+                            break;
+                        }
+                    }
+                    CallbackDispatcher.Invoke(() => breakCallback(this, halt));
+                }
+                catch (Exception exc)
+                {
+                    CallbackDispatcher.Invoke(() => exceptionCallback(this, exc));
+                }
+                executionThread = null;
+            });
+            executionThread.Start();
+            return true;
+        }
+
+        /// <summary>
         /// Execute the next instruction in the processor.
         /// </summary>
         /// <returns><see langword="true"/> if execution started, or <see langword="false"/> if the runner is already busy.</returns>

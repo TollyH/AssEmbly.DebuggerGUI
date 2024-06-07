@@ -42,7 +42,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Resume" Click="ResumeItem_Click">
+            <MenuItem Padding="0" ToolTip="Run to Breakpoint" Click="ResumeItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control.png"/>
                 </MenuItem.Icon>
@@ -58,12 +58,12 @@
                     <Image Source="pack://application:,,,/Icons/arrow-step.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Step Over">
+            <MenuItem Padding="0" ToolTip="Step Over (Ignore Breakpoints)" Click="StepOverItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step-over.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Step Out">
+            <MenuItem Padding="0" ToolTip="Step Out (Ignore Breakpoints)" Click="StepOutItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step-out.png"/>
                 </MenuItem.Icon>

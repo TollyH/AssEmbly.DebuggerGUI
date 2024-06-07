@@ -155,6 +155,7 @@ namespace AssEmbly.DebuggerGUI
 
             UpdateAllInformation();
             ReloadDisassembly();
+            ScrollToProgramOffset(entryPoint);
         }
 
         public void LoadADI(string path)
@@ -250,6 +251,7 @@ namespace AssEmbly.DebuggerGUI
                 // Desired item is out of view - scroll it to center (the ScrollBar will clamp the value for us)
                 programScroll.Value = closestIndex - (programScroll.ViewportSize / 2);
             }
+            UpdateDisassemblyView();
         }
 
         public void DisassembleFromProgramOffset(ulong offset, bool force = false)
@@ -956,6 +958,30 @@ namespace AssEmbly.DebuggerGUI
             }
 
             ReloadDisassembly();
+        }
+
+        private void StepOverItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteOverFunction(OnBreak, OnException, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
+        }
+
+        private void StepOutItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteUntilReturn(OnBreak, OnException, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
         }
     }
 }
