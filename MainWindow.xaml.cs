@@ -407,6 +407,12 @@ namespace AssEmbly.DebuggerGUI
                 {
                     Range addressRange = disassembledAddresses[startAddressIndex + i];
 
+                    ContextMenus.ProgramContextMenu contextMenu = new((ulong)addressRange.Start);
+                    contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                    contextMenu.LabelAdded += ContextMenu_LabelAddedFromProgram;
+                    contextMenu.Jumped += ContextMenu_Jumped;
+                    contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
+
                     TextBlock bytesBlock = (TextBlock)programBytesPanel.Children[i];
                     bytesBlock.Visibility = Visibility.Visible;
                     bytesBlock.Text = "";
@@ -414,11 +420,13 @@ namespace AssEmbly.DebuggerGUI
                     {
                         bytesBlock.Text += $"{programByte:X2} ";
                     }
+                    bytesBlock.ContextMenu = contextMenu;
 
                     BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
                     breakpointButton.Visibility = Visibility.Visible;
                     breakpointButton.Address = (ulong)addressRange.Start;
                     breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
+                    breakpointButton.ContextMenu = contextMenu;
 
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
                     lineBlock.Visibility = Visibility.Visible;
@@ -426,6 +434,7 @@ namespace AssEmbly.DebuggerGUI
                     lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White;
+                    lineBlock.ContextMenu = contextMenu;
 
                     TextBlock labelsBlock = (TextBlock)programLabelsPanel.Children[i];
                     labelsBlock.Visibility = Visibility.Visible;
@@ -434,6 +443,7 @@ namespace AssEmbly.DebuggerGUI
                     {
                         labelsBlock.Text += $":{name} ";
                     }
+                    labelsBlock.ContextMenu = contextMenu;
 
                     // TODO: Syntax highlighting
                     TextBlock codeBlock = (TextBlock)programCodePanel.Children[i];
@@ -446,6 +456,7 @@ namespace AssEmbly.DebuggerGUI
                             codeBlock.Text += $"  ; 0x{referencedAddress:X} -> :{label}";
                         }
                     }
+                    codeBlock.ContextMenu = contextMenu;
                 }
             }
         }
@@ -927,7 +938,7 @@ namespace AssEmbly.DebuggerGUI
         private void ContextMenu_BreakpointRemoved(ContextMenus.BreakpointListContextMenu sender)
         {
             _ = breakpoints.Remove(sender.Breakpoint);
-            UpdateBreakpointListView();
+            UpdateAllInformation();
         }
 
         private void ContextMenu_BreakpointAdded(ContextMenus.BreakpointListContextMenu sender)
@@ -943,7 +954,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
             _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, (ulong)value.Value));
-            UpdateBreakpointListView();
+            UpdateAllInformation();
         }
 
         private void ADIItem_Click(object sender, RoutedEventArgs e)
@@ -985,7 +996,7 @@ namespace AssEmbly.DebuggerGUI
         private void ContextMenu_LabelRemoved(ContextMenus.LabelListContextMenu sender)
         {
             _ = labels.Remove(sender.LabelName);
-            UpdateLabelListView();
+            UpdateAllInformation();
         }
 
         private void LabelItem_Click(object sender, RoutedEventArgs e)
@@ -1083,7 +1094,58 @@ namespace AssEmbly.DebuggerGUI
         private void ContextMenu_AddressRemoved(ContextMenus.SavedAddressListContextMenu sender)
         {
             _ = savedAddresses.Remove(sender.Address);
-            UpdateSavedAddressListView();
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_BreakpointToggled(ContextMenus.ProgramContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            RegisterValueBreakpoint breakpoint = new(Register.rpo, sender.Address);
+            if (!breakpoints.Add(breakpoint))
+            {
+                breakpoints.Remove(breakpoint);
+            }
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_Jumped(ContextMenus.ProgramContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            DebuggingProcessor.Registers[(int)Register.rpo] = sender.Address;
+
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_LabelAddedFromProgram(ContextMenus.ProgramContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            CreateLabelPromptName(sender.Address);
+
+            UpdateAllInformation();
+        }
+
+        private void ContextMenu_AddressSaved(ContextMenus.ProgramContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            SaveAddressPromptName(sender.Address);
+
+            UpdateAllInformation();
         }
     }
 }
