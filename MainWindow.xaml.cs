@@ -343,6 +343,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateBreakpointListView();
             UpdateLabelListView();
             UpdateSavedAddressListView();
+            UpdateMemoryRegionListView();
         }
 
         public void UpdateRegistersView()
@@ -626,6 +627,61 @@ namespace AssEmbly.DebuggerGUI
                 savedAddressListDescriptions.Children.Add(new TextBlock()
                 {
                     Text = description,
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
+        public void UpdateMemoryRegionListView()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            regionListStartAddresses.Children.Clear();
+            regionListEndAddresses.Children.Clear();
+            regionListLengths.Children.Clear();
+            regionListTypes.Children.Clear();
+            foreach (Range region in DebuggingProcessor.MappedMemoryRanges)
+            {
+                // TODO: Create context menu (inc. save address + create label)
+                ContextMenu contextMenu = new();
+
+                regionListStartAddresses.Children.Add(new TextBlock()
+                {
+                    Text = region.Start.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                regionListEndAddresses.Children.Add(new TextBlock()
+                {
+                    Text = region.LastIndex.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                regionListLengths.Children.Add(new TextBlock()
+                {
+                    Text = region.Length.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                regionListTypes.Children.Add(new TextBlock()
+                {
+                    Text = region.Start == 0
+                        ? "Program"
+                        : region.End == DebuggingProcessor.Memory.Length && DebuggingProcessor.MapStack
+                            ? "Stack"
+                            : "Heap",
                     Foreground = Brushes.White,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),

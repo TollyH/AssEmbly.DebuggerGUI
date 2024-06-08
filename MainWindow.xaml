@@ -205,6 +205,27 @@
                             <TextBlock Text="Memory Regions" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Start Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="End Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Length" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="regionListStartAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="regionListEndAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="2" x:Name="regionListLengths" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="3" x:Name="regionListTypes" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                            <GridSplitter Grid.Column="1" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                            <GridSplitter Grid.Column="2" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
