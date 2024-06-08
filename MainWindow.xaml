@@ -153,8 +153,8 @@
                     <Grid Background="Transparent" SizeChanged="ProgramGrid_SizeChanged" MouseWheel="ProgramGrid_MouseWheel">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="125"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="20"/>
