@@ -124,6 +124,8 @@ namespace AssEmbly.DebuggerGUI
             executablePathText.Text = path;
 
             DisassembleFromProgramOffset(executable.EntryPoint);
+
+            UpdateAllInformation();
         }
 
         public void LoadRawExecutable(string path)
@@ -237,8 +239,6 @@ namespace AssEmbly.DebuggerGUI
             }
 
             programScroll.Maximum = disassembledLines.Count;
-
-            UpdateDisassemblyView();
         }
 
         public void ReloadDisassembly()
@@ -247,6 +247,8 @@ namespace AssEmbly.DebuggerGUI
             disassembledAddresses.Clear();
 
             ReloadDisassemblyAfterPosition(0);
+
+            UpdateDisassemblyView();
         }
 
         public void ScrollToProgramOffset(ulong offset)
@@ -310,8 +312,6 @@ namespace AssEmbly.DebuggerGUI
 
             // Re-disassemble everything after the given offset
             ReloadDisassemblyAfterPosition((int)offset);
-
-            UpdateDisassemblyView();
         }
 
         public void BreakExecution()
@@ -1254,6 +1254,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 DisassembleFromProgramOffset(address, true);
             }
+            UpdateDisassemblyView();
         }
 
         private void DisassemblePartialItem_Click(object sender, RoutedEventArgs e)
@@ -1264,6 +1265,7 @@ namespace AssEmbly.DebuggerGUI
             }
 
             DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo], true);
+            UpdateDisassemblyView();
         }
 
         private void DisassembleFullItem_Click(object sender, RoutedEventArgs e)
