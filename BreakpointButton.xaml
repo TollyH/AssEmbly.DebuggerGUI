@@ -21,18 +21,22 @@
                             </Border>
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="false">
-
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="true">
-                                <Setter Property="Opacity" TargetName="breakpointImage" Value="0.8"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="true">
+                            <Trigger Property="IsChecked" Value="True">
                                 <Setter Property="Visibility" TargetName="breakpointImage" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="{x:Null}">
                                 <Setter Property="Visibility" TargetName="breakpointImage" Value="Visible"/>
                                 <Setter Property="Source" TargetName="breakpointImage" Value="pack://application:,,,/Icons/control-record-black.png"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Source" TargetName="breakpointImage" Value="pack://application:,,,/Icons/control-record-black.png"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Visibility" TargetName="breakpointImage" Value="Visible"/>
+                                <Setter Property="Opacity" TargetName="breakpointImage" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" TargetName="breakpointImage" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

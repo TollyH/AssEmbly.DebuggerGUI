@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Buffers.Binary;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Microsoft.Win32;
 
 namespace AssEmbly.DebuggerGUI
@@ -13,6 +15,15 @@ namespace AssEmbly.DebuggerGUI
         Paused,
         Running,
         AwaitingInput
+    }
+
+    public enum JumpArrowStyle
+    {
+        Unconditional,
+        UnconditionalWillJump,
+        ConditionalSatisfied,
+        ConditionalSatisfiedWillJump,
+        ConditionalUnsatisfied
     }
 
     /// <summary>
@@ -46,9 +57,16 @@ namespace AssEmbly.DebuggerGUI
         private Dictionary<ulong, (string Line, List<ulong> References)> disassembledLines = new();
         private List<Range> disassembledAddresses = new();
 
+        private readonly Dictionary<ulong, int> currentlyRenderedInstructions = new();
+
         private readonly FontFamily codeFont = new("Consolas");
 
         private const double lineHeight = 14;
+
+        private const double jumpArrowOffset = lineHeight / 2;
+        private const double jumpArrowSpacing = 10;
+        private const double jumpArrowMinSize = 20;
+        private const double jumpArrowHeadSize = 3;
 
         public MainWindow()
         {
@@ -98,7 +116,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            Environment.CurrentDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
 
             LoadExecutable(executable.Program, executable.EntryPoint);
 
@@ -121,7 +139,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            Environment.CurrentDirectory = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
+            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
 
             LoadExecutable(executable, 0);
 
@@ -398,6 +416,9 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            currentlyRenderedInstructions.Clear();
+            programJumpArrowCanvas.Children.Clear();
+
             int startAddressIndex = (int)programScroll.Value;
             for (int i = 0; i < programCodePanel.Children.Count; i++)
             {
@@ -412,6 +433,8 @@ namespace AssEmbly.DebuggerGUI
                 else
                 {
                     Range addressRange = disassembledAddresses[startAddressIndex + i];
+
+                    currentlyRenderedInstructions[(ulong)addressRange.Start] = i;
 
                     ContextMenus.ProgramContextMenu contextMenu = new((ulong)addressRange.Start);
                     contextMenu.AddressSaved += ContextMenu_AddressSaved;
@@ -464,6 +487,55 @@ namespace AssEmbly.DebuggerGUI
                         }
                     }
                     codeBlock.ContextMenu = contextMenu;
+                }
+            }
+
+            UpdateJumpArrows();
+        }
+
+        private void UpdateJumpArrows()
+        {
+            int jumpArrowIndex = 0;
+
+            int startAddressIndex = (int)programScroll.Value;
+            for (int i = 0; i < programCodePanel.Children.Count && startAddressIndex + i < disassembledAddresses.Count; i++)
+            {
+                Range addressRange = disassembledAddresses[startAddressIndex + i];
+
+                bool currentInstruction = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo];
+
+                ulong offset = (ulong)addressRange.Start;
+                // Don't parse an opcode if there isn't enough memory remaining for it
+                if (DebuggingProcessor!.Memory[offset] != Opcode.FullyQualifiedMarker
+                    || offset <= (ulong)DebuggingProcessor.Memory.Length - 3)
+                {
+                    Opcode instructionOpcode = Opcode.ParseBytes(DebuggingProcessor.Memory, ref offset);
+                    offset++;
+                    // Don't parse the operand if there isn't enough memory remaining for it
+                    if (offset <= (ulong)DebuggingProcessor.Memory.Length - 8)
+                    {
+                        ulong targetAddress = BinaryPrimitives.ReadUInt64LittleEndian(DebuggingProcessor.Memory.AsSpan((int)offset));
+                        if (JumpInstructions.UnconditionalJumps.Contains(instructionOpcode))
+                        {
+                            DrawJumpArrow((ulong)addressRange.Start, targetAddress,
+                                currentInstruction ? JumpArrowStyle.UnconditionalWillJump : JumpArrowStyle.Unconditional, jumpArrowIndex);
+                            jumpArrowIndex++;
+                        }
+                        else if (JumpInstructions.ConditionalJumps.TryGetValue(instructionOpcode,
+                            out (StatusFlags Flags, StatusFlags FlagMask)[]? conditions))
+                        {
+                            bool conditionMet = conditions.Any(c =>
+                                ((StatusFlags)DebuggingProcessor.Registers[(int)Register.rsf] & c.FlagMask) == c.Flags);
+                            DrawJumpArrow((ulong)addressRange.Start, targetAddress,
+                                conditionMet
+                                    ? currentInstruction
+                                        ? JumpArrowStyle.ConditionalSatisfiedWillJump
+                                        : JumpArrowStyle.ConditionalSatisfied
+                                    : JumpArrowStyle.ConditionalUnsatisfied,
+                                jumpArrowIndex);
+                            jumpArrowIndex++;
+                        }
+                    }
                 }
             }
         }
@@ -587,16 +659,15 @@ namespace AssEmbly.DebuggerGUI
                     Foreground = Brushes.Gray,
                     HorizontalAlignment = HorizontalAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 5, 0),
+                    Margin = new Thickness(5, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
                 });
                 programLinesPanel.Children.Add(new TextBlock()
                 {
                     Foreground = Brushes.White,
-                    HorizontalAlignment = HorizontalAlignment.Right,
+                    HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
                 });
@@ -743,6 +814,129 @@ namespace AssEmbly.DebuggerGUI
 
             DisassembleFromProgramOffset(address, true);
             UpdateAllInformation();
+        }
+
+        private void DrawJumpArrow(ulong startAddress, ulong targetAddress, JumpArrowStyle style, int indentationIndex)
+        {
+            if (!currentlyRenderedInstructions.TryGetValue(startAddress, out int startIndex))
+            {
+                return;
+            }
+
+            bool upwards = targetAddress < startAddress;
+
+            bool drawEndLine;
+            double targetY;
+            if (currentlyRenderedInstructions.TryGetValue(targetAddress, out int targetIndex))
+            {
+                drawEndLine = true;
+                targetY = targetIndex * lineHeight + jumpArrowOffset;
+            }
+            else
+            {
+                drawEndLine = false;
+                targetY = upwards ? 0 : programJumpArrowCanvas.ActualHeight;
+            }
+
+            double startY = startIndex * lineHeight + jumpArrowOffset;
+            double innerX = programJumpArrowCanvas.ActualWidth - 2;
+            double outerX = innerX - jumpArrowMinSize - (indentationIndex * jumpArrowSpacing);
+
+            double arrowThickness = style is JumpArrowStyle.UnconditionalWillJump or JumpArrowStyle.ConditionalSatisfiedWillJump ? 3 : 1;
+            SolidColorBrush arrowColor = style is
+                JumpArrowStyle.Unconditional
+                or JumpArrowStyle.UnconditionalWillJump
+                or JumpArrowStyle.ConditionalUnsatisfied
+                    ? Brushes.DarkGray
+                    : Brushes.Red;
+            DoubleCollection arrowDashArray = style is
+                JumpArrowStyle.ConditionalSatisfied
+                or JumpArrowStyle.ConditionalSatisfiedWillJump
+                or JumpArrowStyle.ConditionalUnsatisfied
+                    ? new DoubleCollection([2, 2])
+                    : new DoubleCollection();
+
+            programJumpArrowCanvas.Children.Add(new Line()
+            {
+                X1 = innerX,
+                Y1 = startY,
+                X2 = outerX,
+                Y2 = startY,
+                StrokeThickness = arrowThickness,
+                Stroke = arrowColor,
+                StrokeDashArray = arrowDashArray,
+                SnapsToDevicePixels = true
+            });
+            programJumpArrowCanvas.Children.Add(new Line()
+            {
+                X1 = outerX,
+                Y1 = startY,
+                X2 = outerX,
+                Y2 = targetY,
+                StrokeThickness = arrowThickness,
+                Stroke = arrowColor,
+                StrokeDashArray = arrowDashArray,
+                SnapsToDevicePixels = true
+            });
+            if (drawEndLine)
+            {
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = outerX,
+                    Y1 = targetY,
+                    X2 = innerX,
+                    Y2 = targetY,
+                    StrokeThickness = arrowThickness,
+                    Stroke = arrowColor,
+                    StrokeDashArray = arrowDashArray,
+                    SnapsToDevicePixels = true
+                });
+                // Arrow line head
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = innerX,
+                    Y1 = targetY + 1,
+                    X2 = innerX - jumpArrowHeadSize,
+                    Y2 = targetY - jumpArrowHeadSize + 1,
+                    StrokeThickness = arrowThickness,
+                    Stroke = arrowColor,
+                    SnapsToDevicePixels = true
+                });
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = innerX,
+                    Y1 = targetY + 1,
+                    X2 = innerX - jumpArrowHeadSize,
+                    Y2 = targetY + jumpArrowHeadSize + 1,
+                    StrokeThickness = arrowThickness,
+                    Stroke = arrowColor,
+                    SnapsToDevicePixels = true
+                });
+            }
+            else
+            {
+                // Arrow line head
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = outerX + 1,
+                    Y1 = targetY,
+                    X2 = outerX - jumpArrowHeadSize + 1,
+                    Y2 = targetY + (upwards ? jumpArrowHeadSize : -jumpArrowHeadSize),
+                    StrokeThickness = arrowThickness,
+                    Stroke = arrowColor,
+                    SnapsToDevicePixels = true
+                });
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = outerX + 1,
+                    Y1 = targetY,
+                    X2 = outerX + jumpArrowHeadSize + 1,
+                    Y2 = targetY + (upwards ? jumpArrowHeadSize : -jumpArrowHeadSize),
+                    StrokeThickness = arrowThickness,
+                    Stroke = arrowColor,
+                    SnapsToDevicePixels = true
+                });
+            }
         }
 
         private void OnBreak(BackgroundRunner sender, bool halt)
@@ -1213,6 +1407,11 @@ namespace AssEmbly.DebuggerGUI
             PromptInstructionPatch(sender.Address);
 
             UpdateAllInformation();
+        }
+
+        private void programJumpArrowCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateDisassemblyView();
         }
     }
 }

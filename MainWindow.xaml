@@ -152,14 +152,15 @@
                     </TabItem.Header>
                     <Grid Background="Transparent" SizeChanged="ProgramGrid_SizeChanged" MouseWheel="ProgramGrid_MouseWheel">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="15"/>
-                            <ColumnDefinition Width="125"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel x:Name="programBytesPanel" Grid.Column="0"/>
+                        <Canvas x:Name="programJumpArrowCanvas" Grid.Column="0" ClipToBounds="True" SizeChanged="programJumpArrowCanvas_SizeChanged" SnapsToDevicePixels="True"/>
                         <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#44000000"/>
                         <StackPanel x:Name="programBreakpointsPanel" Grid.Column="1" Background="#26FFFFFF"/>
                         <Border Grid.Column="2" BorderBrush="#7F000000" BorderThickness="1,0">
@@ -167,8 +168,10 @@
                         </Border>
                         <StackPanel x:Name="programLabelsPanel" Grid.Column="3"/>
                         <GridSplitter Grid.Column="3" ResizeDirection="Columns" Width="2" Background="#44000000"/>
-                        <StackPanel x:Name="programCodePanel" Grid.Column="4"/>
-                        <ScrollBar x:Name="programScroll" Grid.Column="5" SmallChange="1" Scroll="programScroll_Scroll"/>
+                        <StackPanel x:Name="programBytesPanel" Grid.Column="4"/>
+                        <GridSplitter Grid.Column="4" ResizeDirection="Columns" Width="2" Background="#44000000"/>
+                        <StackPanel x:Name="programCodePanel" Grid.Column="5"/>
+                        <ScrollBar x:Name="programScroll" Grid.Column="6" SmallChange="1" Scroll="programScroll_Scroll"/>
                     </Grid>
                 </TabItem>
                 <TabItem>
