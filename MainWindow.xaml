@@ -150,7 +150,7 @@
                             <TextBlock Text="Program" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
-                    <Grid Background="Transparent" SizeChanged="ProgramGrid_SizeChanged" MouseWheel="ProgramGrid_MouseWheel">
+                    <Grid x:Name="programGrid" Background="Transparent" SizeChanged="ProgramGrid_SizeChanged" MouseWheel="ProgramGrid_MouseWheel">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="15"/>

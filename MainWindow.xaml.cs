@@ -642,7 +642,7 @@ namespace AssEmbly.DebuggerGUI
             programLabelsPanel.Children.Clear();
             programCodePanel.Children.Clear();
 
-            int lineCount = (int)(programCodePanel.ActualHeight / lineHeight);
+            int lineCount = (int)(programGrid.ActualHeight / lineHeight);
             for (int i = 0; i < lineCount; i++)
             {
                 BreakpointButton breakpointButton = new()
