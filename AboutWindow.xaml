@@ -8,14 +8,14 @@
         Title="About" SizeToContent="WidthAndHeight" Background="#FF424242" Icon="pack://application:,,,/Icons/information.png" ResizeMode="NoResize">
     <Grid Margin="10">
         <StackPanel>
-            <TextBlock Text="AssEmbly Debugger GUI" Foreground="White" FontWeight="Bold" FontSize="24"/>
-            <TextBlock x:Name="versionText" d:Text="GUI Version: x.x.x.x" Foreground="White" FontSize="16"/>
-            <TextBlock x:Name="versionAssEmblyText" d:Text="Bundled AssEmbly Version: x.x.x.x" Foreground="White" FontSize="16"/>
-            <TextBlock Text="Attribution" Foreground="White" FontWeight="Bold" FontSize="18" Margin="0,10,0,0"/>
-            <TextBlock Text="Icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License." Foreground="White" FontSize="16"/>
-            <TextBlock Text="http://p.yusukekamiyamane.com/" Foreground="Cyan" FontSize="16" TextDecorations="Underline" Background="Transparent" HorizontalAlignment="Left" MouseUp="IconAttribution_MouseUp" Cursor="Hand"/>
-            <TextBlock x:Name="copyrightText" d:Text="Copyright Placeholder -- Ptolemy Hill" Foreground="#FFBDBDBD" FontSize="16" Margin="0,15,0,0" HorizontalAlignment="Center"/>
-            <TextBlock Text="This program is free software licensed under GPLv3" Foreground="#FFBDBDBD" FontSize="16" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            <TextBlock Text="AssEmbly Debugger GUI" Foreground="White" FontWeight="Bold" FontSize="16"/>
+            <TextBlock x:Name="versionText" d:Text="GUI Version: x.x.x" Foreground="White"/>
+            <TextBlock x:Name="versionAssEmblyText" d:Text="Bundled AssEmbly Version: x.x.x" Foreground="White"/>
+            <TextBlock Text="Attribution" Foreground="White" FontWeight="Bold" FontSize="14" Margin="0,10,0,0"/>
+            <TextBlock Text="Icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License." Foreground="White"/>
+            <TextBlock Text="http://p.yusukekamiyamane.com/" Foreground="Cyan" TextDecorations="Underline" Background="Transparent" HorizontalAlignment="Left" MouseUp="IconAttribution_MouseUp" Cursor="Hand"/>
+            <TextBlock x:Name="copyrightText" d:Text="Copyright Placeholder -- Ptolemy Hill" Foreground="#FFBDBDBD" Margin="0,15,0,0" HorizontalAlignment="Center"/>
+            <TextBlock Text="This program is free software licensed under GPLv3" Foreground="#FFBDBDBD" HorizontalAlignment="Center" Margin="0,5,0,0"/>
         </StackPanel>
     </Grid>
 </Window>

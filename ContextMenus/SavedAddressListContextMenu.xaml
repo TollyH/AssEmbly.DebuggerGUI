@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
              mc:Ignorable="d"
-             FontFamily="Segoe UI" Foreground="White" FontSize="12">
+             FontFamily="Segoe UI" Foreground="White">
     <ContextMenu.Resources>
         <Style TargetType="local:SavedAddressListContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>

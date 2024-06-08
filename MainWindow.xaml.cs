@@ -48,7 +48,7 @@ namespace AssEmbly.DebuggerGUI
 
         private readonly FontFamily codeFont = new("Cascadia Code");
 
-        private const double lineHeight = 18;
+        private const double lineHeight = 14;
 
         public MainWindow()
         {
@@ -484,7 +484,6 @@ namespace AssEmbly.DebuggerGUI
                     Foreground = breakpoint.TargetValue == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -493,7 +492,6 @@ namespace AssEmbly.DebuggerGUI
                 {
                     Text = disassembledLines.GetValueOrDefault(breakpoint.TargetValue).Line,
                     Foreground = Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -516,7 +514,6 @@ namespace AssEmbly.DebuggerGUI
                 {
                     Text = name,
                     Foreground = Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -527,7 +524,6 @@ namespace AssEmbly.DebuggerGUI
                     Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -551,7 +547,6 @@ namespace AssEmbly.DebuggerGUI
                     Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -560,7 +555,6 @@ namespace AssEmbly.DebuggerGUI
                 {
                     Text = description,
                     Foreground = Brushes.White,
-                    FontSize = 14,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
                     ContextMenu = contextMenu
@@ -596,7 +590,6 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(0, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
-                    FontSize = 12
                 });
                 programLinesPanel.Children.Add(new TextBlock()
                 {
@@ -606,7 +599,6 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(0, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
-                    FontSize = 14
                 });
                 programLabelsPanel.Children.Add(new TextBlock()
                 {
@@ -616,7 +608,6 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(5, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
-                    FontSize = 14
                 });
                 programCodePanel.Children.Add(new TextBlock()
                 {
@@ -626,7 +617,6 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(5, 0, 0, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
-                    FontSize = 14
                 });
             }
 

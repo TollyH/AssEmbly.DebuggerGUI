@@ -187,8 +187,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Source Line" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Source Line" Padding="10,5" VerticalAlignment="Top" Height="30"/>
                             <StackPanel Grid.Column="0" x:Name="breakpointListAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="breakpointListSourceLines" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -219,8 +219,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Name" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Name" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
                             <StackPanel Grid.Column="0" x:Name="labelsListNames" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="labelsListAddresses" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -264,93 +264,93 @@
                     <ScrollViewer Background="#4C000000">
                         <StackPanel Margin="10">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="rpo" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rpoValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rpoValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rpo" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rpoValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rpoValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rso" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rsoValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rsoValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rso" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rsoValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsoValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rsb" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rsbValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rsbValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rsb" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rsbValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsbValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rsf" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rsfValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rsfValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rsf" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rsfValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsfValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rrv" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rrvValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rrvValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rrv" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rrvValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rrvValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rfp" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rfpValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rfpValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rfp" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rfpValue" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rfpValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg0" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg0Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg0ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg0" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg0Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg0ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg1" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg1Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg1ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg1" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg1Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg1ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg2" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg2Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg2ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg2" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg2Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg2ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg3" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg3Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg3ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg3" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg3Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg3ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg4" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg4Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg4ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg4" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg4Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg4ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg5" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg5Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg5ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg5" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg5Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg5ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg6" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg6Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg6ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg6" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg6Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg6ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg7" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg7Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg7ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg7" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg7Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg7ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg8" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg8Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg8ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg8" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg8Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg8ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock Text="rg9" Foreground="White" FontFamily="Cascadia Code" FontSize="15"/>
-                                <TextBlock x:Name="rg9Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
-                                <TextBlock x:Name="rg9ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="15,0,0,0"/>
+                                <TextBlock Text="rg9" Foreground="White" FontFamily="Cascadia Code"/>
+                                <TextBlock x:Name="rg9Value" Text="0000000000000000" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg9ValueExtra" Text="0" Foreground="White" FontFamily="Cascadia Code" Margin="15,0,0,0"/>
                             </StackPanel>
-                            <TextBlock Margin="0,15,0,0" Text="Flags" Foreground="#FFCECECE" FontFamily="Cascadia Code" FontSize="15"/>
+                            <TextBlock Margin="0,15,0,0" Text="Flags" Foreground="#FFCECECE" FontFamily="Cascadia Code"/>
                             <WrapPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBlock x:Name="zeroFlagText" Text="Zero: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
-                                <TextBlock x:Name="carryFlagText" Text="Carry: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
-                                <TextBlock x:Name="fileEndFlagText" Text="FileEnd: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
-                                <TextBlock x:Name="signFlagText" Text="Sign: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
-                                <TextBlock x:Name="overflowFlagText" Text="Overflow: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
-                                <TextBlock x:Name="autoEchoFlagText" Text="AutoEcho: 0" Foreground="White" FontFamily="Cascadia Code" FontSize="15" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="zeroFlagText" Text="Zero: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="carryFlagText" Text="Carry: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="fileEndFlagText" Text="FileEnd: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="signFlagText" Text="Sign: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="overflowFlagText" Text="Overflow: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
+                                <TextBlock x:Name="autoEchoFlagText" Text="AutoEcho: 0" Foreground="White" FontFamily="Cascadia Code" Margin="0,0,20,0"/>
                             </WrapPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -412,8 +412,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" FontSize="14" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" FontSize="14" Text="Description" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Description" Padding="10,5" VerticalAlignment="Top" Height="30"/>
                             <StackPanel Grid.Column="0" x:Name="savedAddressListAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="savedAddressListDescriptions" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -443,9 +443,9 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <ScrollViewer x:Name="consoleScroll" Grid.Row="0" HorizontalScrollBarVisibility="Visible">
-                            <TextBlock x:Name="consoleOutputBlock" Background="#7F000000" Foreground="White" FontFamily="Cascadia Code" Padding="2" FontSize="14" SizeChanged="consoleOutputBlock_SizeChanged"/>
+                            <TextBlock x:Name="consoleOutputBlock" Background="#7F000000" Foreground="White" FontFamily="Cascadia Code" Padding="2" SizeChanged="consoleOutputBlock_SizeChanged"/>
                         </ScrollViewer>
-                        <TextBox x:Name="consoleInputBox" Grid.Row="1" VerticalAlignment="Bottom" Background="#CC000000" Foreground="White" SelectionBrush="LightCoral" BorderBrush="Black" AcceptsReturn="True" FontFamily="Cascadia Code" Padding="2" FontSize="14"/>
+                        <TextBox x:Name="consoleInputBox" Grid.Row="1" VerticalAlignment="Bottom" Background="#CC000000" Foreground="White" SelectionBrush="LightCoral" BorderBrush="Black" AcceptsReturn="True" FontFamily="Cascadia Code" Padding="2"/>
                     </Grid>
                 </TabItem>
                 <TabItem>
