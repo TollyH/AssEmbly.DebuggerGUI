@@ -46,7 +46,7 @@ namespace AssEmbly.DebuggerGUI
         private Dictionary<ulong, (string Line, List<ulong> References)> disassembledLines = new();
         private List<Range> disassembledAddresses = new();
 
-        private readonly FontFamily codeFont = new("Cascadia Code");
+        private readonly FontFamily codeFont = new("Consolas");
 
         private const double lineHeight = 14;
 
