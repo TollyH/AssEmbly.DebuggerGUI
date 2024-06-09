@@ -6,11 +6,11 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
     /// <summary>
     /// Interaction logic for SavedAddressListContextMenu.xaml
     /// </summary>
-    public partial class SavedAddressListContextMenu : ContextMenu
+    public partial class SavedAddressListContextMenu : ContextMenu, IAddressContextMenu
     {
         public ulong Address { get; }
 
-        public delegate void EventDelegate(SavedAddressListContextMenu sender);
+        public delegate void EventDelegate(IAddressContextMenu sender);
 
         public event EventDelegate? AddressRemoved;
         public event EventDelegate? AddressAdded;

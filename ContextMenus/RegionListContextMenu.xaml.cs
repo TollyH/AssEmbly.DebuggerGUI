@@ -4,9 +4,9 @@ using System.Windows.Controls;
 namespace AssEmbly.DebuggerGUI.ContextMenus
 {
     /// <summary>
-    /// Interaction logic for ProgramContextMenu.xaml
+    /// Interaction logic for RegionListContextMenu.xaml
     /// </summary>
-    public partial class ProgramContextMenu : ContextMenu, IAddressContextMenu
+    public partial class RegionListContextMenu : ContextMenu, IAddressContextMenu
     {
         public ulong Address { get; }
 
@@ -14,12 +14,10 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
 
         public event EventDelegate? LabelAdded;
         public event EventDelegate? AddressSaved;
-        public event EventDelegate? BreakpointToggled;
-        public event EventDelegate? Jumped;
-        public event EventDelegate? Edited;
+        public event EventDelegate? ProgramScrolled;
         public event EventDelegate? MemoryScrolled;
 
-        public ProgramContextMenu()
+        public RegionListContextMenu()
         {
             if (!IsInitialized)
             {
@@ -27,7 +25,7 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
             }
         }
 
-        public ProgramContextMenu(ulong address)
+        public RegionListContextMenu(ulong address)
         {
             InitializeComponent();
 
@@ -44,19 +42,9 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
             AddressSaved?.Invoke(this);
         }
 
-        private void BreakpointItem_Click(object sender, RoutedEventArgs e)
+        private void ProgramItem_Click(object sender, RoutedEventArgs e)
         {
-            BreakpointToggled?.Invoke(this);
-        }
-
-        private void JumpItem_Click(object sender, RoutedEventArgs e)
-        {
-            Jumped?.Invoke(this);
-        }
-
-        private void EditItem_Click(object sender, RoutedEventArgs e)
-        {
-            Edited?.Invoke(this);
+            ProgramScrolled?.Invoke(this);
         }
 
         private void MemoryItem_Click(object sender, RoutedEventArgs e)

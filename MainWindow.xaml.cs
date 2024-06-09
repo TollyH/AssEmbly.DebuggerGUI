@@ -299,6 +299,20 @@ namespace AssEmbly.DebuggerGUI
             UpdateDisassemblyView();
         }
 
+        public void ScrollAndSelectMemoryOffset(ulong offset)
+        {
+            int closestIndex = (int)offset / 16;
+            if (closestIndex < memoryScroll.Value || closestIndex >= memoryScroll.Value + memoryScroll.ViewportSize - 1)
+            {
+                // Desired item is out of view - scroll it to center (the ScrollBar will clamp the value for us)
+                memoryScroll.Value = closestIndex - (memoryScroll.ViewportSize / 2);
+            }
+
+            SelectedMemoryAddress = offset;
+
+            UpdateMemoryView();
+        }
+
         public void DisassembleFromProgramOffset(ulong offset, bool force = false)
         {
             if (DebuggingProcessor is null)
@@ -462,10 +476,11 @@ namespace AssEmbly.DebuggerGUI
 
                     ContextMenus.ProgramContextMenu contextMenu = new((ulong)addressRange.Start);
                     contextMenu.AddressSaved += ContextMenu_AddressSaved;
-                    contextMenu.LabelAdded += ContextMenu_LabelAddedFromProgram;
+                    contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
                     contextMenu.Jumped += ContextMenu_Jumped;
                     contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
                     contextMenu.Edited += ContextMenu_Edited;
+                    contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
 
                     TextBlock bytesBlock = (TextBlock)programBytesPanel.Children[i];
                     bytesBlock.Visibility = Visibility.Visible;
@@ -697,8 +712,11 @@ namespace AssEmbly.DebuggerGUI
             regionListTypes.Children.Clear();
             foreach (Range region in DebuggingProcessor.MappedMemoryRanges)
             {
-                // TODO: Create context menu (inc. save address + create label)
-                ContextMenu contextMenu = new();
+                ContextMenus.RegionListContextMenu contextMenu = new((ulong)region.Start);
+                contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
 
                 regionListStartAddresses.Children.Add(new TextBlock()
                 {
@@ -1610,7 +1628,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
-        private void ContextMenu_AddressAdded(ContextMenus.SavedAddressListContextMenu sender)
+        private void ContextMenu_AddressAdded(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1626,13 +1644,13 @@ namespace AssEmbly.DebuggerGUI
             SaveAddressPromptName((ulong)value);
         }
 
-        private void ContextMenu_AddressRemoved(ContextMenus.SavedAddressListContextMenu sender)
+        private void ContextMenu_AddressRemoved(ContextMenus.IAddressContextMenu sender)
         {
             _ = savedAddresses.Remove(sender.Address);
             UpdateAllInformation();
         }
 
-        private void ContextMenu_BreakpointToggled(ContextMenus.ProgramContextMenu sender)
+        private void ContextMenu_BreakpointToggled(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1647,7 +1665,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
-        private void ContextMenu_Jumped(ContextMenus.ProgramContextMenu sender)
+        private void ContextMenu_Jumped(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1659,7 +1677,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
-        private void ContextMenu_LabelAddedFromProgram(ContextMenus.ProgramContextMenu sender)
+        private void ContextMenu_LabelAddedWithAddress(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1671,7 +1689,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
-        private void ContextMenu_AddressSaved(ContextMenus.ProgramContextMenu sender)
+        private void ContextMenu_AddressSaved(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1695,7 +1713,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
-        private void ContextMenu_Edited(ContextMenus.ProgramContextMenu sender)
+        private void ContextMenu_Edited(ContextMenus.IAddressContextMenu sender)
         {
             if (DebuggingProcessor is null)
             {
@@ -1731,6 +1749,20 @@ namespace AssEmbly.DebuggerGUI
 
             SelectedMemoryAddress = (ulong)((FrameworkElement)sender).Tag;
             UpdateAllInformation();
+        }
+
+        private void ContextMenu_MemoryScrolled(ContextMenus.IAddressContextMenu sender)
+        {
+            ScrollAndSelectMemoryOffset(sender.Address);
+            // Switch to memory view
+            memoryTabControl.SelectedIndex = 0;
+        }
+
+        private void ContextMenu_ProgramScrolled(ContextMenus.IAddressContextMenu sender)
+        {
+            ScrollToProgramOffset(sender.Address);
+            // Switch to program view
+            mainTabControl.SelectedIndex = 0;
         }
     }
 }
