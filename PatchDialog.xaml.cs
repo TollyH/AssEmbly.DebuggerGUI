@@ -123,11 +123,18 @@ namespace AssEmbly.DebuggerGUI
                     AssemblyResult = ResultType.Success;
                     instructionStatus.Text = "Instruction is the same size as existing instruction.";
                 }
+
+                resultBytes.Text = "";
+                foreach (byte assembledByte in AssembledBytes)
+                {
+                    resultBytes.Text += $"{assembledByte:X2} ";
+                }
             }
             catch (Exception exc)
             {
                 AssemblyResult = ResultType.Fail;
                 instructionStatus.Text = exc.Message;
+                resultBytes.Text = "";
             }
         }
     }
