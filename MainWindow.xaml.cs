@@ -62,6 +62,7 @@ namespace AssEmbly.DebuggerGUI
         private List<Range> disassembledAddresses = new();
 
         private readonly Dictionary<ulong, int> currentlyRenderedInstructions = new();
+        private readonly HashSet<ulong> currentlyRenderedPointerArrows = new();
 
         private readonly FontFamily codeFont = new("Consolas");
 
@@ -518,6 +519,11 @@ namespace AssEmbly.DebuggerGUI
 
         private void UpdateJumpArrows()
         {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
             int jumpArrowIndex = 0;
 
             int startAddressIndex = (int)programScroll.Value;
@@ -525,11 +531,11 @@ namespace AssEmbly.DebuggerGUI
             {
                 Range addressRange = disassembledAddresses[startAddressIndex + i];
 
-                bool currentInstruction = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo];
+                bool currentInstruction = (ulong)addressRange.Start == DebuggingProcessor.Registers[(int)Register.rpo];
 
                 ulong offset = (ulong)addressRange.Start;
                 // Don't parse an opcode if there isn't enough memory remaining for it
-                if (DebuggingProcessor!.Memory[offset] != Opcode.FullyQualifiedMarker
+                if (DebuggingProcessor.Memory[offset] != Opcode.FullyQualifiedMarker
                     || offset <= (ulong)DebuggingProcessor.Memory.Length - 3)
                 {
                     Opcode instructionOpcode = Opcode.ParseBytes(DebuggingProcessor.Memory, ref offset);
@@ -559,6 +565,31 @@ namespace AssEmbly.DebuggerGUI
                             jumpArrowIndex++;
                         }
                     }
+                }
+            }
+
+            UpdatePointerArrows(jumpArrowIndex);
+        }
+
+        private void UpdatePointerArrows(int startArrowIndex)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            currentlyRenderedPointerArrows.Clear();
+
+            int startAddressIndex = (int)programScroll.Value;
+            for (int i = 0; i < programCodePanel.Children.Count && startAddressIndex + i < disassembledAddresses.Count; i++)
+            {
+                ulong address = (ulong)disassembledAddresses[startAddressIndex + i].Start;
+                // Get registers that have a value equal to the current address
+                foreach (int register in DebuggingProcessor.Registers.Select((regAddress, index) => (regAddress, index))
+                    .Where(ai => ai.regAddress == address).Select(ai => ai.index))
+                {
+                    DrawPointerArrow((Register)register, address, startArrowIndex);
+                    startArrowIndex++;
                 }
             }
         }
@@ -1124,6 +1155,72 @@ namespace AssEmbly.DebuggerGUI
                     SnapsToDevicePixels = true
                 });
             }
+        }
+
+        private void DrawPointerArrow(Register register, ulong targetAddress, int indentationIndex)
+        {
+            if (!currentlyRenderedInstructions.TryGetValue(targetAddress, out int targetIndex))
+            {
+                return;
+            }
+
+            double innerX = programJumpArrowCanvas.ActualWidth - 2;
+            double outerX = innerX - jumpArrowMinSize - (indentationIndex * jumpArrowSpacing * 2);
+            double targetY = targetIndex * lineHeight + jumpArrowOffset;
+
+            // We only need to draw the arrow for 1 register per address
+            if (currentlyRenderedPointerArrows.Add(targetAddress))
+            {
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = outerX,
+                    Y1 = targetY,
+                    X2 = innerX,
+                    Y2 = targetY,
+                    StrokeThickness = 1,
+                    Stroke = Brushes.LimeGreen,
+                    SnapsToDevicePixels = true
+                });
+                // Arrow line head
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = innerX,
+                    Y1 = targetY + 1,
+                    X2 = innerX - jumpArrowHeadSize,
+                    Y2 = targetY - jumpArrowHeadSize + 1,
+                    StrokeThickness = 1,
+                    Stroke = Brushes.LimeGreen,
+                    SnapsToDevicePixels = true
+                });
+                programJumpArrowCanvas.Children.Add(new Line()
+                {
+                    X1 = innerX,
+                    Y1 = targetY + 1,
+                    X2 = innerX - jumpArrowHeadSize,
+                    Y2 = targetY + jumpArrowHeadSize + 1,
+                    StrokeThickness = 1,
+                    Stroke = Brushes.LimeGreen,
+                    SnapsToDevicePixels = true
+                });
+            }
+
+            Label registerNameLabel = new()
+            {
+                Content = register.ToString(),
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                FontFamily = codeFont,
+                FontSize = 10,
+                Padding = new Thickness(0),
+                Background = Brushes.White,
+                Foreground = Brushes.LimeGreen,
+                Width = jumpArrowSpacing * 2,
+                Height = lineHeight,
+                SnapsToDevicePixels = true
+            };
+            Canvas.SetTop(registerNameLabel, targetIndex * lineHeight);
+            Canvas.SetRight(registerNameLabel, innerX - outerX);
+            programJumpArrowCanvas.Children.Add(registerNameLabel);
         }
 
         private void OnBreak(BackgroundRunner sender, bool halt)
