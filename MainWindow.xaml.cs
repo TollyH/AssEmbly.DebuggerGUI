@@ -65,7 +65,7 @@ namespace AssEmbly.DebuggerGUI
 
         private const double jumpArrowOffset = lineHeight / 2;
         private const double jumpArrowSpacing = 10;
-        private const double jumpArrowMinSize = 20;
+        private const double jumpArrowMinSize = 21;
         private const double jumpArrowHeadSize = 3;
 
         public MainWindow()
