@@ -411,6 +411,110 @@
                             <TextBlock Text="Memory" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+                        <Grid Background="Transparent" MouseWheel="MemoryGrid_MouseWheel" SizeChanged="MemoryGrid_SizeChanged">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="115"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="20"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition x:Name="memoryDataRow" Height="1*"/>
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="16" Background="#26FFFFFF" BorderBrush="#7F000000" BorderThickness="1,0,1,1"/>
+                            <Border Grid.Row="0" Grid.Column="0" Background="#26FFFFFF" BorderBrush="#7F000000" BorderThickness="0,0,0,1">
+                                <TextBlock Margin="4,2" Text="Address" Foreground="White" FontFamily="Consolas"/>
+                            </Border>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="00" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" Text="01" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="3" Text="02" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="4" Text="03" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="5" Text="04" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="6" Text="05" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="7" Text="06" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="8" Text="07" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="9" Text="08" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="10" Text="09" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="11" Text="0A" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="12" Text="0B" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="13" Text="0C" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="14" Text="0D" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="15" Text="0E" Foreground="White" FontFamily="Consolas"/>
+                            <TextBlock Margin="4,2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.Column="16" Text="0F" Foreground="White" FontFamily="Consolas"/>
+                            <Border Grid.Row="0" Grid.Column="17" Grid.ColumnSpan="16" Background="#26FFFFFF" BorderBrush="#7F000000" BorderThickness="0,0,0,1">
+                                <TextBlock Margin="5,2,5,2" Text="ASCII" Foreground="White" FontFamily="Consolas" HorizontalAlignment="Left"/>
+                            </Border>
+                            <Border Grid.Column="0" Grid.Row="1" BorderBrush="#7F000000" BorderThickness="1,0">
+                                <StackPanel x:Name="memoryAddressPanel" Background="#26FFFFFF"/>
+                            </Border>
+                            <StackPanel x:Name="memoryBytesPanel0" Grid.Column="1" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel1" Grid.Column="2" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel2" Grid.Column="3" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel3" Grid.Column="4" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel4" Grid.Column="5" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel5" Grid.Column="6" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel6" Grid.Column="7" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel7" Grid.Column="8" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel8" Grid.Column="9" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanel9" Grid.Column="10" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelA" Grid.Column="11" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelB" Grid.Column="12" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelC" Grid.Column="13" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelD" Grid.Column="14" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelE" Grid.Column="15" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryBytesPanelF" Grid.Column="16" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel0" Grid.Column="17" Grid.Row="1" Margin="5,0,0,0"/>
+                            <StackPanel x:Name="memoryAsciiPanel1" Grid.Column="18" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel2" Grid.Column="19" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel3" Grid.Column="20" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel4" Grid.Column="21" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel5" Grid.Column="22" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel6" Grid.Column="23" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel7" Grid.Column="24" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel8" Grid.Column="25" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanel9" Grid.Column="26" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelA" Grid.Column="27" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelB" Grid.Column="28" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelC" Grid.Column="29" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelD" Grid.Column="30" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelE" Grid.Column="31" Grid.Row="1"/>
+                            <StackPanel x:Name="memoryAsciiPanelF" Grid.Column="32" Grid.Row="1"/>
+                            <ScrollBar x:Name="memoryScroll" Grid.Column="34" Grid.Row="1" SmallChange="1" Scroll="memoryScroll_Scroll"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Microsoft.Win32;
@@ -49,6 +50,9 @@ namespace AssEmbly.DebuggerGUI
         private readonly TextBlock[] registerValueExtraBlocks;
         private readonly Dictionary<StatusFlags, TextBlock> statusFlagBlocks;
 
+        private readonly StackPanel[] memoryBytePanels;
+        private readonly StackPanel[] memoryAsciiPanels;
+
         private readonly VirtualConsoleOutputStream consoleOutput;
         private readonly VirtualConsoleInputStream consoleInput;
 
@@ -92,6 +96,21 @@ namespace AssEmbly.DebuggerGUI
                 { StatusFlags.Sign, signFlagText },
                 { StatusFlags.Overflow, overflowFlagText },
                 { StatusFlags.AutoEcho, autoEchoFlagText }
+            };
+
+            memoryBytePanels = new StackPanel[16]
+            {
+                memoryBytesPanel0, memoryBytesPanel1, memoryBytesPanel2, memoryBytesPanel3,
+                memoryBytesPanel4, memoryBytesPanel5, memoryBytesPanel6, memoryBytesPanel7,
+                memoryBytesPanel8, memoryBytesPanel9, memoryBytesPanelA, memoryBytesPanelB,
+                memoryBytesPanelC, memoryBytesPanelD, memoryBytesPanelE, memoryBytesPanelF
+            };
+            memoryAsciiPanels = new StackPanel[16]
+            {
+                memoryAsciiPanel0, memoryAsciiPanel1, memoryAsciiPanel2, memoryAsciiPanel3,
+                memoryAsciiPanel4, memoryAsciiPanel5, memoryAsciiPanel6, memoryAsciiPanel7,
+                memoryAsciiPanel8, memoryAsciiPanel9, memoryAsciiPanelA, memoryAsciiPanelB,
+                memoryAsciiPanelC, memoryAsciiPanelD, memoryAsciiPanelE, memoryAsciiPanelF
             };
 
             consoleOutput = new VirtualConsoleOutputStream(consoleOutputBlock, Dispatcher);
@@ -175,6 +194,8 @@ namespace AssEmbly.DebuggerGUI
 
             consoleOutputBlock.Text = "";
             consoleInputBox.Text = "";
+
+            memoryScroll.Maximum = Math.Ceiling(DebuggingProcessor.Memory.Length / 16d);
 
             UpdateAllInformation();
             ReloadDisassembly();
@@ -344,6 +365,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateLabelListView();
             UpdateSavedAddressListView();
             UpdateMemoryRegionListView();
+            UpdateMemoryView();
         }
 
         public void UpdateRegistersView()
@@ -690,6 +712,59 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateMemoryView()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            int startAddressIndex = (int)memoryScroll.Value;
+            for (int i = 0; i < memoryAddressPanel.Children.Count; i++)
+            {
+                int startAddress = (startAddressIndex + i) * 16;
+
+                TextBlock addressBlock = (TextBlock)memoryAddressPanel.Children[i];
+                if (startAddress >= DebuggingProcessor.Memory.Length)
+                {
+                    addressBlock.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    addressBlock.Visibility = Visibility.Visible;
+                    addressBlock.Text = startAddress.ToString("X16");
+                }
+
+                for (int addressOffset = 0; addressOffset < 16; addressOffset++)
+                {
+                    TextBlock dataBlock = (TextBlock)memoryBytePanels[addressOffset].Children[i];
+                    TextBlock asciiBlock = (TextBlock)memoryAsciiPanels[addressOffset].Children[i];
+                    int address = startAddress + addressOffset;
+                    if (address >= DebuggingProcessor.Memory.Length)
+                    {
+                        dataBlock.Visibility = Visibility.Hidden;
+                        asciiBlock.Visibility = Visibility.Hidden;
+                    }
+                    else
+                    {
+                        byte data = DebuggingProcessor.Memory[address];
+                        SolidColorBrush? background = (ulong)address == SelectedMemoryAddress ? Brushes.Gray : null;
+
+                        dataBlock.Visibility = Visibility.Visible;
+                        dataBlock.Text = data.ToString("X2");
+                        dataBlock.Background = background;
+                        dataBlock.Tag = (ulong)address;
+
+                        asciiBlock.Visibility = Visibility.Visible;
+                        // >= ' ' and <= '~'
+                        asciiBlock.Text = data is >= 32 and <= 126 ? ((char)data).ToString() : ".";
+                        asciiBlock.Background = background;
+                        asciiBlock.Tag = (ulong)address;
+                    }
+                }
+            }
+        }
+
         public void ReloadDisassemblyView()
         {
             programBytesPanel.Children.Clear();
@@ -750,6 +825,62 @@ namespace AssEmbly.DebuggerGUI
             programScroll.ViewportSize = lineCount;
 
             UpdateDisassemblyView();
+        }
+
+        public void ReloadMemoryView()
+        {
+            memoryAddressPanel.Children.Clear();
+            foreach (StackPanel panel in memoryBytePanels)
+            {
+                panel.Children.Clear();
+            }
+            foreach (StackPanel panel in memoryAsciiPanels)
+            {
+                panel.Children.Clear();
+            }
+
+            int lineCount = (int)(memoryDataRow.ActualHeight / lineHeight);
+            for (int i = 0; i < lineCount; i++)
+            {
+                memoryAddressPanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontFamily = codeFont,
+                    Height = lineHeight,
+                });
+                foreach (StackPanel panel in memoryBytePanels)
+                {
+                    TextBlock dataBlock = new()
+                    {
+                        Foreground = Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontFamily = codeFont,
+                        Height = lineHeight,
+                    };
+                    dataBlock.MouseDown += MemoryBlock_MouseDown;
+                    panel.Children.Add(dataBlock);
+                }
+                foreach (StackPanel panel in memoryAsciiPanels)
+                {
+                    TextBlock asciiBlock = new()
+                    {
+                        Foreground = Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontFamily = codeFont,
+                        Height = lineHeight,
+                    };
+                    asciiBlock.MouseDown += MemoryBlock_MouseDown;
+                    panel.Children.Add(asciiBlock);
+                }
+            }
+
+            memoryScroll.ViewportSize = lineCount;
+
+            UpdateMemoryView();
         }
 
         public void UpdateRunningState(RunningState state)
@@ -1151,10 +1282,16 @@ namespace AssEmbly.DebuggerGUI
             ReloadDisassemblyView();
         }
 
-        private void ProgramGrid_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void ProgramGrid_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             programScroll.Value -= Math.CopySign(programScroll.ActualHeight / lineHeight / 4, e.Delta);
             UpdateDisassemblyView();
+        }
+
+        private void MemoryGrid_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            memoryScroll.Value -= Math.CopySign(memoryScroll.ActualHeight / lineHeight / 4, e.Delta);
+            UpdateMemoryView();
         }
 
         private void BreakItem_Click(object sender, RoutedEventArgs e)
@@ -1212,6 +1349,9 @@ namespace AssEmbly.DebuggerGUI
                 case 1:  // Breakpoint tab
                     UpdateBreakpointListView();
                     break;
+                case 2:  // Regions tab
+                    UpdateMemoryRegionListView();
+                    break;
                 case 3:  // Labels tab
                     UpdateLabelListView();
                     break;
@@ -1222,6 +1362,9 @@ namespace AssEmbly.DebuggerGUI
         {
             switch (mainTabControl.SelectedIndex)
             {
+                case 0:  // Memory tab
+                    UpdateMemoryView();
+                    break;
                 case 2:  // Saved addresses tab
                     UpdateSavedAddressListView();
                     break;
@@ -1470,6 +1613,27 @@ namespace AssEmbly.DebuggerGUI
         private void programJumpArrowCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateDisassemblyView();
+        }
+
+        private void memoryScroll_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            UpdateMemoryView();
+        }
+
+        private void MemoryGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ReloadMemoryView();
+        }
+
+        private void MemoryBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left)
+            {
+                return;
+            }
+
+            SelectedMemoryAddress = (ulong)((FrameworkElement)sender).Tag;
+            UpdateAllInformation();
         }
     }
 }
