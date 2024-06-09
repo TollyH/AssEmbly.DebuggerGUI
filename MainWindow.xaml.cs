@@ -62,7 +62,7 @@ namespace AssEmbly.DebuggerGUI
         private List<Range> disassembledAddresses = new();
 
         private readonly Dictionary<ulong, int> currentlyRenderedInstructions = new();
-        private readonly HashSet<ulong> currentlyRenderedPointerArrows = new();
+        private readonly Dictionary<ulong, int> currentlyRenderedPointerArrows = new();
 
         private readonly FontFamily codeFont = new("Consolas");
 
@@ -580,16 +580,12 @@ namespace AssEmbly.DebuggerGUI
 
             currentlyRenderedPointerArrows.Clear();
 
-            int startAddressIndex = (int)programScroll.Value;
-            for (int i = 0; i < programCodePanel.Children.Count && startAddressIndex + i < disassembledAddresses.Count; i++)
+            for (int i = 0; i < DebuggingProcessor.Registers.Length; i++)
             {
-                ulong address = (ulong)disassembledAddresses[startAddressIndex + i].Start;
-                // Get registers that have a value equal to the current address
-                foreach (int register in DebuggingProcessor.Registers.Select((regAddress, index) => (regAddress, index))
-                    .Where(ai => ai.regAddress == address).Select(ai => ai.index))
+                ulong value = DebuggingProcessor.Registers[i];
+                if (currentlyRenderedInstructions.ContainsKey(value))
                 {
-                    DrawPointerArrow((Register)register, address, startArrowIndex);
-                    startArrowIndex++;
+                    DrawPointerArrow((Register)i, value, startArrowIndex);
                 }
             }
         }
@@ -1157,19 +1153,22 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        private void DrawPointerArrow(Register register, ulong targetAddress, int indentationIndex)
+        private void DrawPointerArrow(Register register, ulong targetAddress, int startIndentationIndex)
         {
             if (!currentlyRenderedInstructions.TryGetValue(targetAddress, out int targetIndex))
             {
                 return;
             }
 
+            int indentationIndex = currentlyRenderedPointerArrows.GetValueOrDefault(targetAddress);
+
             double innerX = programJumpArrowCanvas.ActualWidth - 2;
-            double outerX = innerX - jumpArrowMinSize - (indentationIndex * jumpArrowSpacing * 2);
+            double outerX = innerX - jumpArrowMinSize -
+                ((startIndentationIndex + indentationIndex) * jumpArrowSpacing * 2);
             double targetY = targetIndex * lineHeight + jumpArrowOffset;
 
             // We only need to draw the arrow for 1 register per address
-            if (currentlyRenderedPointerArrows.Add(targetAddress))
+            if (currentlyRenderedPointerArrows.TryAdd(targetAddress, 0))
             {
                 programJumpArrowCanvas.Children.Add(new Line()
                 {
@@ -1203,6 +1202,7 @@ namespace AssEmbly.DebuggerGUI
                     SnapsToDevicePixels = true
                 });
             }
+            currentlyRenderedPointerArrows[targetAddress]++;
 
             Label registerNameLabel = new()
             {
@@ -1213,7 +1213,7 @@ namespace AssEmbly.DebuggerGUI
                 FontSize = 10,
                 Padding = new Thickness(0),
                 Background = Brushes.White,
-                Foreground = Brushes.LimeGreen,
+                Foreground = Brushes.Green,
                 Width = jumpArrowSpacing * 2,
                 Height = lineHeight,
                 SnapsToDevicePixels = true
