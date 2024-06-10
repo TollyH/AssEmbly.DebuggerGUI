@@ -331,82 +331,146 @@
                         <StackPanel Margin="10">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="rpo" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rpoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rpoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rpo" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rpoValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rso" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rsoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rso" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rsoValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rsb" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rsbValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsbValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rsb" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rsbValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rsf" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rsfValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rsfValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rsf" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rsfValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rrv" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rrvValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rrvValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rrv" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rrvValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rfp" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rfpValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rfpValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rfp" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rfpValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg0" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg0Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg0Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg0" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg0ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg1" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg1Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg1Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg1" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg1ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg2" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg2Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg2Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg2" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg2ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg3" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg3Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg3Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg3" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg3ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg4" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg4Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg4Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg4" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg4ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg5" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg5Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg5Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg5" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg5ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg6" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg6Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg6Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg6" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg6ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg7" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg7Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg7Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg7" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg7ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg8" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg8Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg8Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg8" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg8ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBlock Text="rg9" Foreground="White" FontFamily="Consolas"/>
-                                <TextBlock x:Name="rg9Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
+                                <TextBlock x:Name="rg9Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
+                                    <TextBlock.ContextMenu>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg9" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                                 <TextBlock x:Name="rg9ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
                             </StackPanel>
                             <TextBlock Margin="0,15,0,0" Text="Flags" Foreground="#FFCECECE" FontFamily="Consolas"/>

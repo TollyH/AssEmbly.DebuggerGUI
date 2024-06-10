@@ -1883,6 +1883,8 @@ namespace AssEmbly.DebuggerGUI
             if (address is not null)
             {
                 ScrollToProgramOffset((ulong)address);
+                // Switch to program view
+                mainTabControl.SelectedIndex = 0;
             }
         }
 
@@ -1897,7 +1899,57 @@ namespace AssEmbly.DebuggerGUI
             if (address is not null)
             {
                 ScrollAndSelectMemoryOffset((ulong)address);
+                // Switch to memory view
+                memoryTabControl.SelectedIndex = 0;
             }
+        }
+
+        private void RegisterContextMenu_AddressSaved(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            SaveAddressPromptName(DebuggingProcessor.Registers[(int)sender.RepresentedRegister]);
+
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_LabelAdded(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            CreateLabelPromptName(DebuggingProcessor.Registers[(int)sender.RepresentedRegister]);
+
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_ProgramScrolled(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            ScrollToProgramOffset(DebuggingProcessor.Registers[(int)sender.RepresentedRegister]);
+            // Switch to program view
+            mainTabControl.SelectedIndex = 0;
+        }
+
+        private void RegisterContextMenu_MemoryScrolled(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            ScrollAndSelectMemoryOffset(DebuggingProcessor.Registers[(int)sender.RepresentedRegister]);
+            // Switch to memory view
+            memoryTabControl.SelectedIndex = 0;
         }
     }
 }
