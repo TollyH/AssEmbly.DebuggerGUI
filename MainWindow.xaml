@@ -81,6 +81,17 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
+            <MenuItem Padding="0" ToolTip="Go To Program Offset" Click="GoToProgramItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/processor-arrow.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Go To Memory Address" Click="GoToMemoryItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/memory-arrow.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
             <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position" Click="BreakpointItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>

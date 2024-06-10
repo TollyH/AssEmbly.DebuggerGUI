@@ -1865,5 +1865,33 @@ namespace AssEmbly.DebuggerGUI
         {
             UpdateHeapStatsView();
         }
+
+        private void GoToProgramItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? address = AskHexadecimalNumber("Enter program offset to scroll to in hexadecimal", "Enter Offset");
+            if (address is not null)
+            {
+                ScrollToProgramOffset((ulong)address);
+            }
+        }
+
+        private void GoToMemoryItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? address = AskHexadecimalNumber("Enter memory address to scroll to in hexadecimal", "Enter Address");
+            if (address is not null)
+            {
+                ScrollAndSelectMemoryOffset((ulong)address);
+            }
+        }
     }
 }
