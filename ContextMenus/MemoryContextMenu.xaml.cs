@@ -8,7 +8,7 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
     /// </summary>
     public partial class MemoryContextMenu : ContextMenu, IAddressContextMenu
     {
-        public ulong Address { get; }
+        public ulong Address { get; set; }
 
         public delegate void EventDelegate(IAddressContextMenu sender);
 

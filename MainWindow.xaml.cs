@@ -475,14 +475,6 @@ namespace AssEmbly.DebuggerGUI
 
                     currentlyRenderedInstructions[(ulong)addressRange.Start] = i;
 
-                    ContextMenus.ProgramContextMenu contextMenu = new((ulong)addressRange.Start);
-                    contextMenu.AddressSaved += ContextMenu_AddressSaved;
-                    contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
-                    contextMenu.Jumped += ContextMenu_Jumped;
-                    contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
-                    contextMenu.Edited += ContextMenu_Edited;
-                    contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
-
                     TextBlock bytesBlock = (TextBlock)programBytesPanel.Children[i];
                     bytesBlock.Visibility = Visibility.Visible;
                     bytesBlock.Text = "";
@@ -490,13 +482,13 @@ namespace AssEmbly.DebuggerGUI
                     {
                         bytesBlock.Text += $"{programByte:X2} ";
                     }
-                    bytesBlock.ContextMenu = contextMenu;
+                    ((ContextMenus.ProgramContextMenu)bytesBlock.ContextMenu!).Address = (ulong)addressRange.Start;
 
                     BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
                     breakpointButton.Visibility = Visibility.Visible;
                     breakpointButton.Address = (ulong)addressRange.Start;
                     breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
-                    breakpointButton.ContextMenu = contextMenu;
+                    ((ContextMenus.ProgramContextMenu)breakpointButton.ContextMenu!).Address = (ulong)addressRange.Start;
 
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
                     lineBlock.Visibility = Visibility.Visible;
@@ -504,7 +496,7 @@ namespace AssEmbly.DebuggerGUI
                     lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White;
-                    lineBlock.ContextMenu = contextMenu;
+                    ((ContextMenus.ProgramContextMenu)lineBlock.ContextMenu!).Address = (ulong)addressRange.Start;
 
                     TextBlock labelsBlock = (TextBlock)programLabelsPanel.Children[i];
                     labelsBlock.Visibility = Visibility.Visible;
@@ -513,7 +505,7 @@ namespace AssEmbly.DebuggerGUI
                     {
                         labelsBlock.Text += $":{name} ";
                     }
-                    labelsBlock.ContextMenu = contextMenu;
+                    ((ContextMenus.ProgramContextMenu)labelsBlock.ContextMenu!).Address = (ulong)addressRange.Start;
 
                     // TODO: Syntax highlighting
                     TextBlock codeBlock = (TextBlock)programCodePanel.Children[i];
@@ -526,7 +518,7 @@ namespace AssEmbly.DebuggerGUI
                             codeBlock.Text += $"  ; 0x{referencedAddress:X} -> :{label}";
                         }
                     }
-                    codeBlock.ContextMenu = contextMenu;
+                    ((ContextMenus.ProgramContextMenu)codeBlock.ContextMenu!).Address = (ulong)addressRange.Start;
                 }
             }
 
@@ -799,11 +791,6 @@ namespace AssEmbly.DebuggerGUI
                     }
                     else
                     {
-                        ContextMenus.MemoryContextMenu contextMenu = new((ulong)address);
-                        contextMenu.AddressSaved += ContextMenu_AddressSaved;
-                        contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
-                        contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
-
                         byte data = DebuggingProcessor.Memory[address];
                         SolidColorBrush? background = (ulong)address == SelectedMemoryAddress ? Brushes.Gray : null;
 
@@ -811,14 +798,14 @@ namespace AssEmbly.DebuggerGUI
                         dataBlock.Text = data.ToString("X2");
                         dataBlock.Background = background;
                         dataBlock.Tag = (ulong)address;
-                        dataBlock.ContextMenu = contextMenu;
+                        ((ContextMenus.MemoryContextMenu)dataBlock.ContextMenu!).Address = (ulong)address;
 
                         asciiBlock.Visibility = Visibility.Visible;
                         // >= ' ' and <= '~'
                         asciiBlock.Text = data is >= 32 and <= 126 ? ((char)data).ToString() : ".";
                         asciiBlock.Background = background;
                         asciiBlock.Tag = (ulong)address;
-                        asciiBlock.ContextMenu = contextMenu;
+                        ((ContextMenus.MemoryContextMenu)asciiBlock.ContextMenu!).Address = (ulong)address;
                     }
                 }
             }
@@ -927,11 +914,20 @@ namespace AssEmbly.DebuggerGUI
             int lineCount = (int)(programGrid.ActualHeight / lineHeight);
             for (int i = 0; i < lineCount; i++)
             {
+                ContextMenus.ProgramContextMenu contextMenu = new();
+                contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                contextMenu.Jumped += ContextMenu_Jumped;
+                contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
+                contextMenu.Edited += ContextMenu_Edited;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
+
                 BreakpointButton breakpointButton = new()
                 {
                     Height = lineHeight,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    ContextMenu = contextMenu
                 };
                 breakpointButton.Checked += BreakpointButton_Checked;
                 breakpointButton.Unchecked += BreakpointButton_Unchecked;
@@ -944,6 +940,7 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(5, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
+                    ContextMenu = contextMenu
                 });
                 programLinesPanel.Children.Add(new TextBlock()
                 {
@@ -952,6 +949,7 @@ namespace AssEmbly.DebuggerGUI
                     VerticalAlignment = VerticalAlignment.Center,
                     FontFamily = codeFont,
                     Height = lineHeight,
+                    ContextMenu = contextMenu
                 });
                 programLabelsPanel.Children.Add(new TextBlock()
                 {
@@ -961,6 +959,7 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(5, 0, 5, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
+                    ContextMenu = contextMenu
                 });
                 programCodePanel.Children.Add(new TextBlock()
                 {
@@ -970,6 +969,7 @@ namespace AssEmbly.DebuggerGUI
                     Margin = new Thickness(5, 0, 0, 0),
                     FontFamily = codeFont,
                     Height = lineHeight,
+                    ContextMenu = contextMenu
                 });
             }
 
@@ -999,10 +999,16 @@ namespace AssEmbly.DebuggerGUI
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     FontFamily = codeFont,
-                    Height = lineHeight,
+                    Height = lineHeight
                 });
-                foreach (StackPanel panel in memoryBytePanels)
+
+                foreach (StackPanel panel in memoryBytePanels.Concat(memoryAsciiPanels))
                 {
+                    ContextMenus.MemoryContextMenu contextMenu = new();
+                    contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                    contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                    contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+
                     TextBlock dataBlock = new()
                     {
                         Foreground = Brushes.White,
@@ -1010,22 +1016,10 @@ namespace AssEmbly.DebuggerGUI
                         VerticalAlignment = VerticalAlignment.Center,
                         FontFamily = codeFont,
                         Height = lineHeight,
+                        ContextMenu = contextMenu
                     };
                     dataBlock.MouseDown += MemoryBlock_MouseDown;
                     panel.Children.Add(dataBlock);
-                }
-                foreach (StackPanel panel in memoryAsciiPanels)
-                {
-                    TextBlock asciiBlock = new()
-                    {
-                        Foreground = Brushes.White,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        FontFamily = codeFont,
-                        Height = lineHeight,
-                    };
-                    asciiBlock.MouseDown += MemoryBlock_MouseDown;
-                    panel.Children.Add(asciiBlock);
                 }
             }
 
