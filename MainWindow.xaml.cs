@@ -381,6 +381,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateSavedAddressListView();
             UpdateMemoryRegionListView();
             UpdateMemoryView();
+            UpdateHeapStatsView();
         }
 
         public void UpdateRegistersView()
@@ -746,7 +747,7 @@ namespace AssEmbly.DebuggerGUI
                 {
                     Text = region.Start == 0
                         ? "Program"
-                        : region.End == DebuggingProcessor.Memory.Length && DebuggingProcessor.MapStack
+                        : region.End == DebuggingProcessor.Memory.Length
                             ? "Stack"
                             : "Heap",
                     Foreground = Brushes.White,
@@ -807,6 +808,98 @@ namespace AssEmbly.DebuggerGUI
                         asciiBlock.Tag = (ulong)address;
                     }
                 }
+            }
+        }
+
+        public void UpdateHeapStatsView()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long memorySize = DebuggingProcessor.Memory.LongLength;
+            IReadOnlyList<Range> mappedRanges = DebuggingProcessor.MappedMemoryRanges;
+            long programSize = mappedRanges[0].Length;
+            long stackSize = mappedRanges[^1].Length;
+            long freeMemory =
+                memorySize - programSize - stackSize - mappedRanges.Skip(1).SkipLast(1).Sum(r => r.Length);
+
+            List<Range> freeBlocks = new();
+            long largestFree = -1;
+            for (int i = 0; i < mappedRanges.Count - 1; i++)
+            {
+                if (mappedRanges[i].End != mappedRanges[i + 1].Start)
+                {
+                    Range newRange;
+                    try
+                    {
+                        newRange = new(mappedRanges[i].End, mappedRanges[i + 1].Start);
+                    }
+                    catch (ArgumentException)
+                    {
+                        return;
+                    }
+                    freeBlocks.Add(newRange);
+                    if (newRange.Length > largestFree)
+                    {
+                        largestFree = newRange.Length;
+                    }
+                }
+            }
+
+            totalMemoryBlock.Text = $"Total Memory: {memorySize:N0} bytes";
+            totalFreeMemoryBlock.Text = $"Total free Memory: {freeMemory:N0} bytes";
+
+            freeBlocksBlock.Text = $"Number of free blocks: {freeBlocks.Count:N0}";
+            largestFreeBlockBlock.Text = $"Largest free contiguous block: {largestFree:N0} bytes " +
+                $"({100d - (double)largestFree / freeMemory * 100d:N2}% fragmentation)";
+
+            allocatedBlocksBlock.Text = $"Number of allocated blocks: {mappedRanges.Count - 2:N0}";
+            allocatedSizeBlock.Text = $"Total size of allocated blocks: {mappedRanges.Skip(1).SkipLast(1).Sum(m => m.Length):N0} bytes";
+
+            stackSizeBlock.Text = $"Stack size: {stackSize:N0} bytes";
+            programSizeBlock.Text = $"Program size: {programSize:N0} bytes";
+
+            memoryGraph.Children.Clear();
+
+            double memoryGraphWidth = heapStatsPanel.ActualWidth - 25;
+            if (memoryGraphWidth <= 0)
+            {
+                return;
+            }
+            double widthPerByte = memoryGraphWidth / memorySize;
+            // Iterate over both mapped and unmapped ranges
+            foreach ((Range range, bool mapped) in mappedRanges
+                .Select(r => (r, true)).Concat(freeBlocks.Select(b => (b, false))).OrderBy(b => b.Item1.Start))
+            {
+                double widthWithoutBorder = widthPerByte * range.Length - 1;
+                if (widthWithoutBorder < 0)
+                {
+                    continue;
+                }
+                memoryGraph.Children.Add(new Rectangle()
+                {
+                    Fill = mapped ? Brushes.Red : Brushes.LawnGreen,
+                    Width = widthWithoutBorder,
+                    Height = 32,
+                    SnapsToDevicePixels = true,
+                    ToolTip = $"{(mapped ? "Mapped" : "Unmapped")}" +
+                        $"\nSize: {range.Length:N0} bytes" +
+                        $"\nStart: {range.Start:X16}" +
+                        $"\nEnd: {range.LastIndex:X16}"
+                });
+                memoryGraph.Children.Add(new Rectangle()
+                {
+                    Fill = Brushes.Black,
+                    Width = 1,
+                    Height = 32,
+                    SnapsToDevicePixels = true,
+                    ToolTip = $"{(mapped ? "Mapped" : "Unmapped")}" +
+                        $"\nSize: {range.Length:N0} bytes" +
+                        $"\nStart: {range.Start:X16}" +
+                        $"\nEnd: {range.LastIndex:X16}"
+                });
             }
         }
 
@@ -1470,6 +1563,9 @@ namespace AssEmbly.DebuggerGUI
                 case 3:  // Labels tab
                     UpdateLabelListView();
                     break;
+                case 4:  // Heap stats tab
+                    UpdateHeapStatsView();
+                    break;
             }
         }
 
@@ -1763,6 +1859,11 @@ namespace AssEmbly.DebuggerGUI
             ScrollToProgramOffset(sender.Address);
             // Switch to program view
             mainTabControl.SelectedIndex = 0;
+        }
+
+        private void heapStatsPanel_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateHeapStatsView();
         }
     }
 }

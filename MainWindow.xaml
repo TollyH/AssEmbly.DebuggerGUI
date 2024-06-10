@@ -258,6 +258,37 @@
                             <TextBlock Text="Heap Stats" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer Margin="5">
+                        <StackPanel x:Name="heapStatsPanel" SizeChanged="heapStatsPanel_SizeChanged">
+                            <GroupBox Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left" Header="Memory bytes" Foreground="White">
+                                <StackPanel>
+                                    <TextBlock x:Name="totalMemoryBlock" Margin="5" Text="Total Memory:"/>
+                                    <TextBlock x:Name="totalFreeMemoryBlock" Margin="5" Text="Total free Memory:"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left" Header="Free memory blocks" Foreground="White">
+                                <StackPanel>
+                                    <TextBlock x:Name="freeBlocksBlock" Margin="5" Text="Number of free blocks:"/>
+                                    <TextBlock x:Name="largestFreeBlockBlock" Margin="5" Text="Largest free contiguous block:"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left" Header="Allocated memory blocks" Foreground="White">
+                                <StackPanel>
+                                    <TextBlock x:Name="allocatedBlocksBlock" Margin="5" Text="Number of allocated blocks:"/>
+                                    <TextBlock x:Name="allocatedSizeBlock" Margin="5" Text="Total size of allocated blocks:"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left" Header="Reserved regions" Foreground="White">
+                                <StackPanel>
+                                    <TextBlock x:Name="stackSizeBlock" Margin="5" Text="Stack size:"/>
+                                    <TextBlock x:Name="programSizeBlock" Margin="5" Text="Program size:"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left" Header="Memory map" Foreground="White">
+                                <StackPanel x:Name="memoryGraph" Margin="5" Orientation="Horizontal"/>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
