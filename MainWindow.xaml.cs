@@ -799,6 +799,11 @@ namespace AssEmbly.DebuggerGUI
                     }
                     else
                     {
+                        ContextMenus.MemoryContextMenu contextMenu = new((ulong)address);
+                        contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                        contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                        contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+
                         byte data = DebuggingProcessor.Memory[address];
                         SolidColorBrush? background = (ulong)address == SelectedMemoryAddress ? Brushes.Gray : null;
 
@@ -806,12 +811,14 @@ namespace AssEmbly.DebuggerGUI
                         dataBlock.Text = data.ToString("X2");
                         dataBlock.Background = background;
                         dataBlock.Tag = (ulong)address;
+                        dataBlock.ContextMenu = contextMenu;
 
                         asciiBlock.Visibility = Visibility.Visible;
                         // >= ' ' and <= '~'
                         asciiBlock.Text = data is >= 32 and <= 126 ? ((char)data).ToString() : ".";
                         asciiBlock.Background = background;
                         asciiBlock.Tag = (ulong)address;
+                        asciiBlock.ContextMenu = contextMenu;
                     }
                 }
             }
