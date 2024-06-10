@@ -15,6 +15,17 @@
         </MenuItem.Icon>
     </MenuItem>
     <Separator/>
+    <MenuItem x:Name="programItem" Header="Scroll to Address in Program" Click="ProgramItem_Click" Visibility="Collapsed">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-arrow.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem x:Name="memoryItem" Header="Scroll to Address in Memory" Click="MemoryItem_Click" Visibility="Collapsed">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/memory-arrow.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Add New Breakpoint" Click="AddItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>

@@ -14,6 +14,8 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
 
         public event EventDelegate? AddressRemoved;
         public event EventDelegate? AddressAdded;
+        public event EventDelegate? ProgramScrolled;
+        public event EventDelegate? MemoryScrolled;
 
         public SavedAddressListContextMenu()
         {
@@ -30,6 +32,8 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
             Address = address;
             // Only show remove item if this context menu has a saved address associated with it
             removeItem.Visibility = Visibility.Visible;
+            programItem.Visibility = Visibility.Visible;
+            memoryItem.Visibility = Visibility.Visible;
         }
 
         private void RemoveItem_Click(object sender, RoutedEventArgs e)
@@ -40,6 +44,16 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void AddItem_Click(object sender, RoutedEventArgs e)
         {
             AddressAdded?.Invoke(this);
+        }
+
+        private void ProgramItem_Click(object sender, RoutedEventArgs e)
+        {
+            ProgramScrolled?.Invoke(this);
+        }
+
+        private void MemoryItem_Click(object sender, RoutedEventArgs e)
+        {
+            MemoryScrolled?.Invoke(this);
         }
     }
 }

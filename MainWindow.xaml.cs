@@ -615,6 +615,8 @@ namespace AssEmbly.DebuggerGUI
                 ContextMenus.BreakpointListContextMenu contextMenu = new(breakpoint);
                 contextMenu.BreakpointRemoved += ContextMenu_BreakpointRemoved;
                 contextMenu.BreakpointAdded += ContextMenu_BreakpointAdded;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
 
                 breakpointListAddresses.Children.Add(new TextBlock()
                 {
@@ -643,10 +645,12 @@ namespace AssEmbly.DebuggerGUI
             labelsListAddresses.Children.Clear();
             foreach ((string name, ulong address) in labels.OrderBy(l => l.Value))
             {
-                ContextMenus.LabelListContextMenu contextMenu = new(name);
+                ContextMenus.LabelListContextMenu contextMenu = new(name, address);
                 contextMenu.LabelRemoved += ContextMenu_LabelRemoved;
                 contextMenu.LabelAdded += ContextMenu_LabelAdded;
                 contextMenu.LabelDisassembling += ContextMenu_LabelDisassembling;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
 
                 labelsListNames.Children.Add(new TextBlock()
                 {
@@ -678,6 +682,8 @@ namespace AssEmbly.DebuggerGUI
                 ContextMenus.SavedAddressListContextMenu contextMenu = new(address);
                 contextMenu.AddressRemoved += ContextMenu_AddressRemoved;
                 contextMenu.AddressAdded += ContextMenu_AddressAdded;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
 
                 savedAddressListAddresses.Children.Add(new TextBlock()
                 {
