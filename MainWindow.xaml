@@ -432,6 +432,14 @@
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
+                            <Image Width="16" Height="16" Source="pack://application:,,,/Icons/drawer--pencil.png"/>
+                            <TextBlock Text="Persistent Register Edits" Margin="5,0,0,0" Foreground="White"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
                             <Image Width="16" Height="16" Source="pack://application:,,,/Icons/system-monitor.png"/>
                             <TextBlock Text="Status" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
