@@ -67,6 +67,8 @@ namespace AssEmbly.DebuggerGUI
 
         private readonly FontFamily codeFont = new("Consolas");
 
+        private readonly SyntaxHighlighting highlighter = new();
+
         private const double lineHeight = 14;
 
         private const double jumpArrowOffset = lineHeight / 2;
@@ -508,18 +510,20 @@ namespace AssEmbly.DebuggerGUI
                     }
                     ((ContextMenus.ProgramContextMenu)labelsBlock.ContextMenu!).Address = (ulong)addressRange.Start;
 
-                    // TODO: Syntax highlighting
                     TextBlock codeBlock = (TextBlock)programCodePanel.Children[i];
                     codeBlock.Visibility = Visibility.Visible;
-                    codeBlock.Text = disassembledLines[(ulong)addressRange.Start].Line;
+                    ((ContextMenus.ProgramContextMenu)codeBlock.ContextMenu!).Address = (ulong)addressRange.Start;
+
+                    string line = disassembledLines[(ulong)addressRange.Start].Line;
                     foreach (ulong referencedAddress in disassembledLines[(ulong)addressRange.Start].References)
                     {
                         foreach (string label in labels.Where(kv => kv.Value == referencedAddress).Select(kv => kv.Key))
                         {
-                            codeBlock.Text += $"  ; 0x{referencedAddress:X} -> :{label}";
+                            line += $"  ; 0x{referencedAddress:X} -> :{label}";
                         }
                     }
-                    ((ContextMenus.ProgramContextMenu)codeBlock.ContextMenu!).Address = (ulong)addressRange.Start;
+                    codeBlock.Inlines.Clear();
+                    codeBlock.Inlines.AddRange(highlighter.HighlightLine(line));
                 }
             }
 
@@ -975,7 +979,7 @@ namespace AssEmbly.DebuggerGUI
                 });
                 programLabelsPanel.Children.Add(new TextBlock()
                 {
-                    Foreground = Brushes.LightBlue,
+                    Foreground = highlighter.LabelDefinitionColor,
                     HorizontalAlignment = HorizontalAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5, 0, 5, 0),
