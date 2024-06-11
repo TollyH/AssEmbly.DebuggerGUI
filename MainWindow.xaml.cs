@@ -62,6 +62,7 @@ namespace AssEmbly.DebuggerGUI
         private List<Range> disassembledAddresses = new();
 
         private readonly Dictionary<ulong, int> currentlyRenderedInstructions = new();
+        private readonly Dictionary<ulong, int> currentMaxArrowIndentation = new();
         private readonly Dictionary<ulong, int> currentlyRenderedPointerArrows = new();
 
         private readonly FontFamily codeFont = new("Consolas");
@@ -532,7 +533,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            int jumpArrowIndex = 0;
+            currentMaxArrowIndentation.Clear();
 
             int startAddressIndex = (int)programScroll.Value;
             for (int i = 0; i < programCodePanel.Children.Count && startAddressIndex + i < disassembledAddresses.Count; i++)
@@ -552,15 +553,27 @@ namespace AssEmbly.DebuggerGUI
                     if (offset <= (ulong)DebuggingProcessor.Memory.Length - 8)
                     {
                         ulong targetAddress = BinaryPrimitives.ReadUInt64LittleEndian(DebuggingProcessor.Memory.AsSpan((int)offset));
+                        bool arrowDrawn = false;
+                        int jumpArrowIndex = 0;
                         if (JumpInstructions.UnconditionalJumps.Contains(instructionOpcode))
                         {
+                            jumpArrowIndex = currentMaxArrowIndentation
+                                .Where(kv => (ulong)addressRange.Start < targetAddress
+                                        ? kv.Key >= (ulong)addressRange.Start && kv.Key <= targetAddress
+                                        : kv.Key <= (ulong)addressRange.Start && kv.Key >= targetAddress)
+                                .Select(kv => kv.Value).DefaultIfEmpty(0).Max();
                             DrawJumpArrow((ulong)addressRange.Start, targetAddress,
                                 currentInstruction ? JumpArrowStyle.UnconditionalWillJump : JumpArrowStyle.Unconditional, jumpArrowIndex);
-                            jumpArrowIndex++;
+                            arrowDrawn = true;
                         }
                         else if (JumpInstructions.ConditionalJumps.TryGetValue(instructionOpcode,
                             out (StatusFlags Flags, StatusFlags FlagMask)[]? conditions))
                         {
+                            jumpArrowIndex = currentMaxArrowIndentation
+                                .Where(kv => (ulong)addressRange.Start < targetAddress
+                                    ? kv.Key >= (ulong)addressRange.Start && kv.Key <= targetAddress
+                                    : kv.Key <= (ulong)addressRange.Start && kv.Key >= targetAddress)
+                                .Select(kv => kv.Value).DefaultIfEmpty(0).Max();
                             bool conditionMet = conditions.Any(c =>
                                 ((StatusFlags)DebuggingProcessor.Registers[(int)Register.rsf] & c.FlagMask) == c.Flags);
                             DrawJumpArrow((ulong)addressRange.Start, targetAddress,
@@ -570,20 +583,20 @@ namespace AssEmbly.DebuggerGUI
                                         : JumpArrowStyle.ConditionalSatisfied
                                     : JumpArrowStyle.ConditionalUnsatisfied,
                                 jumpArrowIndex);
+                            arrowDrawn = true;
+                        }
+
+                        if (arrowDrawn)
+                        {
                             jumpArrowIndex++;
+                            for (ulong address = Math.Min((ulong)addressRange.Start, targetAddress);
+                                address <= Math.Max((ulong)addressRange.Start, targetAddress); address++)
+                            {
+                                currentMaxArrowIndentation[address] = jumpArrowIndex;
+                            }
                         }
                     }
                 }
-            }
-
-            UpdatePointerArrows(jumpArrowIndex);
-        }
-
-        private void UpdatePointerArrows(int startArrowIndex)
-        {
-            if (DebuggingProcessor is null)
-            {
-                return;
             }
 
             currentlyRenderedPointerArrows.Clear();
@@ -593,7 +606,7 @@ namespace AssEmbly.DebuggerGUI
                 ulong value = DebuggingProcessor.Registers[i];
                 if (currentlyRenderedInstructions.ContainsKey(value))
                 {
-                    DrawPointerArrow((Register)i, value, startArrowIndex);
+                    DrawPointerArrow((Register)i, value, currentMaxArrowIndentation.GetValueOrDefault(value));
                 }
             }
         }
