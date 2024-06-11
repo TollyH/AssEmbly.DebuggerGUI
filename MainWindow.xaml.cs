@@ -528,7 +528,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void UpdateJumpArrows()
         {
-            if (DebuggingProcessor is null)
+            if (DebuggingProcessor is null || disassembledAddresses.Count == 0)
             {
                 return;
             }
@@ -536,6 +536,11 @@ namespace AssEmbly.DebuggerGUI
             currentMaxArrowIndentation.Clear();
 
             int startAddressIndex = (int)programScroll.Value;
+
+            ulong minDisplayedAddress = (ulong)disassembledAddresses[startAddressIndex].Start;
+            ulong maxDisplayedAddress = (ulong)disassembledAddresses[
+                Math.Min(startAddressIndex + programCodePanel.Children.Count - 1, disassembledAddresses.Count - 1)].LastIndex;
+
             for (int i = 0; i < programCodePanel.Children.Count && startAddressIndex + i < disassembledAddresses.Count; i++)
             {
                 Range addressRange = disassembledAddresses[startAddressIndex + i];
@@ -592,6 +597,10 @@ namespace AssEmbly.DebuggerGUI
                             for (ulong address = Math.Min((ulong)addressRange.Start, targetAddress);
                                 address <= Math.Max((ulong)addressRange.Start, targetAddress); address++)
                             {
+                                if (address > maxDisplayedAddress || address < minDisplayedAddress)
+                                {
+                                    break;
+                                }
                                 currentMaxArrowIndentation[address] = jumpArrowIndex;
                             }
                         }
