@@ -1124,50 +1124,55 @@ namespace AssEmbly.DebuggerGUI
             UpdateSavedAddressListView();
         }
 
-        private void PromptInstructionPatch(ulong address)
+        private void PromptInstructionPatch(ulong address, bool continuous)
         {
             if (DebuggingProcessor is null)
             {
                 return;
             }
 
-            string currentLine;
-            ulong instructionSize;
-            if (disassembledLines.TryGetValue(address, out (string Line, List<ulong> References) line))
+            while (continuous && address < (ulong)DebuggingProcessor.Memory.Length)
             {
-                currentLine = line.Line;
-                instructionSize = (ulong)disassembledAddresses.First(a => a.Start == (long)address).Length;
-            }
-            else
-            {
-                (currentLine, instructionSize, _, _) = Disassembler.DisassembleInstruction(
-                    DebuggingProcessor.Memory.AsSpan((int)address), disassemblerOptions, false);
-            }
+                string currentLine;
+                ulong instructionSize;
+                if (disassembledLines.TryGetValue(address, out (string Line, List<ulong> References) line))
+                {
+                    currentLine = line.Line;
+                    instructionSize = (ulong)disassembledAddresses.First(a => a.Start == (long)address).Length;
+                }
+                else
+                {
+                    (currentLine, instructionSize, _, _) = Disassembler.DisassembleInstruction(
+                        DebuggingProcessor.Memory.AsSpan((int)address), disassemblerOptions, false);
+                }
 
-            int proceedingNops = 0;
-            while ((int)(address + instructionSize) + proceedingNops < DebuggingProcessor.Memory.Length
-                && DebuggingProcessor.Memory[(int)(address + instructionSize) + proceedingNops] == 0x01)
-            {
-                proceedingNops++;
-            }
+                int proceedingNops = 0;
+                while ((int)(address + instructionSize) + proceedingNops < DebuggingProcessor.Memory.Length
+                    && DebuggingProcessor.Memory[(int)(address + instructionSize) + proceedingNops] == 0x01)
+                {
+                    proceedingNops++;
+                }
 
-            PatchDialog dialog = new(currentLine, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
-            {
-                Owner = this
-            };
-            if (!(dialog.ShowDialog() ?? false) || dialog.AssemblyResult == PatchDialog.ResultType.Fail)
-            {
-                return;
-            }
+                PatchDialog dialog = new(currentLine, address, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
+                {
+                    Owner = this
+                };
+                if (!(dialog.ShowDialog() ?? false) || dialog.AssemblyResult == PatchDialog.ResultType.Fail)
+                {
+                    return;
+                }
 
-            dialog.AssembledBytes.CopyTo(DebuggingProcessor.Memory, (long)address);
-            for (int i = dialog.AssembledBytes.Length; i < (int)instructionSize; i++)
-            {
-                DebuggingProcessor.Memory[(int)address + i] = 0x01;  // NOP
-            }
+                dialog.AssembledBytes.CopyTo(DebuggingProcessor.Memory, (long)address);
+                for (int i = dialog.AssembledBytes.Length; i < (int)instructionSize; i++)
+                {
+                    DebuggingProcessor.Memory[(int)address + i] = 0x01; // NOP
+                }
 
-            DisassembleFromProgramOffset(address, true);
-            UpdateAllInformation();
+                DisassembleFromProgramOffset(address, true);
+                UpdateAllInformation();
+
+                address += (ulong)dialog.AssembledBytes.Length;
+            }
         }
 
         private void DrawJumpArrow(ulong startAddress, ulong targetAddress, JumpArrowStyle style, int indentationIndex)
@@ -1833,7 +1838,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            PromptInstructionPatch(DebuggingProcessor.Registers[(int)Register.rpo]);
+            PromptInstructionPatch(DebuggingProcessor.Registers[(int)Register.rpo], true);
 
             UpdateAllInformation();
         }
@@ -1845,7 +1850,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            PromptInstructionPatch(sender.Address);
+            PromptInstructionPatch(sender.Address, true);
 
             UpdateAllInformation();
         }

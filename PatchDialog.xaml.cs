@@ -41,12 +41,14 @@ namespace AssEmbly.DebuggerGUI
 
         public Dictionary<string, ulong> Labels { get; }
 
-        public PatchDialog(string currentLine, int maxBytes, int targetBytes, Dictionary<string, ulong> labels)
+        public PatchDialog(string currentLine, ulong address, int maxBytes, int targetBytes, Dictionary<string, ulong> labels)
         {
             InitializeComponent();
 
             MaxBytes = maxBytes;
             TargetBytes = targetBytes;
+
+            messageBlock.Text = $"Enter the new line of AssEmbly code for address 0x{address:X}.";
 
             if (maxBytes == targetBytes)
             {
