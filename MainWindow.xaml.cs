@@ -1512,7 +1512,7 @@ namespace AssEmbly.DebuggerGUI
             popup.ShowDialog();
         }
 
-        private long? AskHexadecimalNumber(string message, string title)
+        private long? PromptNumberInput(string message, string title)
         {
             DialogPopup popup = new(message, title, DialogPopup.QuestionIcon, true)
             {
@@ -1526,7 +1526,8 @@ namespace AssEmbly.DebuggerGUI
 
             try
             {
-                return Convert.ToInt64(popup.InputText, 16);
+                _ = Assembler.ParseLiteral(popup.InputText, false, out ulong parsedNumber);
+                return (long)parsedNumber;
             }
             catch (Exception exception)
             {
@@ -1739,7 +1740,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the address to break on in hexadecimal", "New Breakpoint");
+            long? value = PromptNumberInput("Enter the address to break on", "New Breakpoint");
             if (value is null)
             {
                 return;
@@ -1775,7 +1776,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the address to add label to in hexadecimal", "New Label");
+            long? value = PromptNumberInput("Enter the address to add a label to", "New Label");
             if (value is null)
             {
                 return;
@@ -1875,7 +1876,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the address to save in hexadecimal", "Save Address");
+            long? value = PromptNumberInput("Enter the address to save", "Save Address");
             if (value is null)
             {
                 return;
@@ -2017,7 +2018,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? address = AskHexadecimalNumber("Enter program offset to scroll to in hexadecimal", "Enter Offset");
+            long? address = PromptNumberInput("Enter program offset to scroll to", "Enter Offset");
             if (address is not null)
             {
                 ScrollToProgramOffset((ulong)address);
@@ -2033,7 +2034,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? address = AskHexadecimalNumber("Enter memory address to scroll to in hexadecimal", "Enter Address");
+            long? address = PromptNumberInput("Enter memory address to scroll to", "Enter Address");
             if (address is not null)
             {
                 ScrollAndSelectMemoryOffset((ulong)address);
@@ -2108,7 +2109,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
                 _ = breakpoints.Add(new RegisterValueBreakpoint(sender.RepresentedRegister, (ulong)value.Value));
@@ -2143,7 +2144,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
                 _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Byte, (byte)value.Value));
@@ -2165,7 +2166,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
                 _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Word, (ushort)value.Value));
@@ -2187,7 +2188,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
                 _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.DoubleWord, (uint)value.Value));
@@ -2209,7 +2210,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
                 _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.QuadWord, (ulong)value.Value));
