@@ -882,6 +882,25 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
+            HashSet<ulong> watchedAddresses = new();
+            foreach (IMemoryBreakpoint breakpoint in breakpoints.OfType<IMemoryBreakpoint>())
+            {
+                ulong byteCount = breakpoint.CheckSize switch
+                {
+                    PointerReadSize.Byte => 1,
+                    PointerReadSize.Word => 2,
+                    PointerReadSize.DoubleWord => 4,
+                    PointerReadSize.QuadWord => 8,
+                    _ => 1
+                };
+                for (ulong i = 0; i < byteCount; i++)
+                {
+                    watchedAddresses.Add(breakpoint.CheckAddress + i);
+                }
+            }
+
+            HashSet<ulong> pointedAddresses = DebuggingProcessor.Registers.ToHashSet();
+
             int startAddressIndex = (int)memoryScroll.Value;
             for (int i = 0; i < memoryAddressPanel.Children.Count; i++)
             {
@@ -913,9 +932,24 @@ namespace AssEmbly.DebuggerGUI
                         byte data = DebuggingProcessor.Memory[address];
                         SolidColorBrush? background = (ulong)address == SelectedMemoryAddress ? Brushes.Gray : null;
 
+                        ulong? oldAddress = (ulong?)dataBlock.Tag;
+                        bool sameAddress = oldAddress is not null && oldAddress == (ulong)address;
+
+                        string dataText = data.ToString("X2");
+                        SolidColorBrush foreground = sameAddress && dataText != dataBlock.Text
+                            ? Brushes.LightCoral  // Data changed
+                            : watchedAddresses.Contains((ulong)address)
+                                ? Brushes.Turquoise  // Data watched
+                                : pointedAddresses.Contains((ulong)address)
+                                    ? Brushes.LawnGreen  // Data pointed to by register
+                                    : savedAddresses.ContainsKey((ulong)address)
+                                        ? Brushes.Gold  // Address is saved
+                                        : Brushes.White;
+
                         dataBlock.Visibility = Visibility.Visible;
-                        dataBlock.Text = data.ToString("X2");
+                        dataBlock.Text = dataText;
                         dataBlock.Background = background;
+                        dataBlock.Foreground = foreground;
                         dataBlock.Tag = (ulong)address;
                         ((ContextMenus.MemoryContextMenu)dataBlock.ContextMenu!).Address = (ulong)address;
 
@@ -923,6 +957,7 @@ namespace AssEmbly.DebuggerGUI
                         // >= ' ' and <= '~'
                         asciiBlock.Text = data is >= 32 and <= 126 ? ((char)data).ToString() : ".";
                         asciiBlock.Background = background;
+                        asciiBlock.Foreground = foreground;
                         asciiBlock.Tag = (ulong)address;
                         ((ContextMenus.MemoryContextMenu)asciiBlock.ContextMenu!).Address = (ulong)address;
                     }
