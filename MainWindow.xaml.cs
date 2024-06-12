@@ -1515,8 +1515,15 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
-            ScrollToProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo]);
+            ulong newAddress = DebuggingProcessor.Registers[(int)Register.rpo];
+            if (newAddress >= (ulong)DebuggingProcessor.Memory.Length)
+            {
+                ShowErrorDialog("The rpo register does not contain a valid memory address", "Invalid Program Offset");
+                UnloadExecutable();
+                return;
+            }
+            DisassembleFromProgramOffset(newAddress);
+            ScrollToProgramOffset(newAddress);
             UpdateRunningState(consoleInput.EmptyReadAttempt ? RunningState.AwaitingInput : RunningState.Paused);
             UpdateAllInformation();
             if (halt)
