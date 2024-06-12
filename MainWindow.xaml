@@ -16,6 +16,7 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Background="#7F000000">
             <Menu.Resources>
+                <!-- ReSharper disable once Xaml.RedundantResource -->
                 <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
                     <Setter Property="OverridesDefaultStyle" Value="True"/>
                     <Setter Property="Template">
@@ -333,7 +334,7 @@
                                 <TextBlock Text="rpo" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rpoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rpo" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rpo" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rpoValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -342,7 +343,7 @@
                                 <TextBlock Text="rso" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rsoValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rso" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rso" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rsoValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -351,7 +352,7 @@
                                 <TextBlock Text="rsb" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rsbValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rsb" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rsb" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rsbValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -360,7 +361,7 @@
                                 <TextBlock Text="rsf" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rsfValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rsf" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rsf" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rsfValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -369,7 +370,7 @@
                                 <TextBlock Text="rrv" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rrvValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rrv" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rrv" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rrvValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -378,7 +379,7 @@
                                 <TextBlock Text="rfp" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rfpValue" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rfp" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rfp" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rfpValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -387,7 +388,7 @@
                                 <TextBlock Text="rg0" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg0Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg0" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg0" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg0ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -396,7 +397,7 @@
                                 <TextBlock Text="rg1" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg1Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg1" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg1" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg1ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -405,7 +406,7 @@
                                 <TextBlock Text="rg2" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg2Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg2" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg2" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg2ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -414,7 +415,7 @@
                                 <TextBlock Text="rg3" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg3Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg3" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg3" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg3ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -423,7 +424,7 @@
                                 <TextBlock Text="rg4" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg4Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg4" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg4" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg4ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -432,7 +433,7 @@
                                 <TextBlock Text="rg5" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg5Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg5" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg5" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg5ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -441,7 +442,7 @@
                                 <TextBlock Text="rg6" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg6Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg6" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg6" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg6ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -450,7 +451,7 @@
                                 <TextBlock Text="rg7" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg7Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg7" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg7" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg7ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -459,7 +460,7 @@
                                 <TextBlock Text="rg8" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg8Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg8" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg8" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg8ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -468,7 +469,7 @@
                                 <TextBlock Text="rg9" Foreground="White" FontFamily="Consolas"/>
                                 <TextBlock x:Name="rg9Value" Text="0000000000000000" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0">
                                     <TextBlock.ContextMenu>
-                                        <menu:RegisterContextMenu RepresentedRegister="rg9" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled"/>
+                                        <menu:RegisterContextMenu RepresentedRegister="rg9" AddressSaved="RegisterContextMenu_AddressSaved" LabelAdded="RegisterContextMenu_LabelAdded" ProgramScrolled="RegisterContextMenu_ProgramScrolled" MemoryScrolled="RegisterContextMenu_MemoryScrolled" ValueWatchAdded="RegisterContextMenu_ValueWatchAdded" ChangeWatchAdded="RegisterContextMenu_ChangeWatchAdded"/>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
                                 <TextBlock x:Name="rg9ValueExtra" Text="0" Foreground="White" FontFamily="Consolas" Margin="15,0,0,0"/>
@@ -492,6 +493,23 @@
                             <TextBlock Text="Register Watch" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Register" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="registerWatchListRegisters" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="registerWatchListTypes" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="2" x:Name="registerWatchListValues" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                            <GridSplitter Grid.Column="1" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
@@ -637,6 +655,27 @@
                             <TextBlock Text="Memory Watch" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Size" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <StackPanel Grid.Column="0" x:Name="memoryWatchListAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="memoryWatchListSizes" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="2" x:Name="memoryWatchListTypes" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="3" x:Name="memoryWatchListValues" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                            <GridSplitter Grid.Column="1" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                            <GridSplitter Grid.Column="2" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>

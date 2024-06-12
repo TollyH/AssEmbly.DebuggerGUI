@@ -23,6 +23,8 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? AddressSaved;
         public event EventDelegate? ProgramScrolled;
         public event EventDelegate? MemoryScrolled;
+        public event EventDelegate? ValueWatchAdded;
+        public event EventDelegate? ChangeWatchAdded;
 
         public RegisterContextMenu()
         {
@@ -50,6 +52,16 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void MemoryItem_Click(object sender, RoutedEventArgs e)
         {
             MemoryScrolled?.Invoke(this);
+        }
+
+        private void WatchValueItem_Click(object sender, RoutedEventArgs e)
+        {
+            ValueWatchAdded?.Invoke(this);
+        }
+
+        private void WatchChangeItem_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeWatchAdded?.Invoke(this);
         }
     }
 }

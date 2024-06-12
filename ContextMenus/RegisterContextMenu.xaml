@@ -20,6 +20,17 @@
         </MenuItem.Icon>
     </MenuItem>
     <Separator/>
+    <MenuItem Header="Break on Specific Value" Click="WatchValueItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/counter.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on Any Change" Click="WatchChangeItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/eye.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Scroll to Address in Program" Click="ProgramItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/processor-arrow.png"/>

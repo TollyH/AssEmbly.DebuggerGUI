@@ -20,6 +20,48 @@
         </MenuItem.Icon>
     </MenuItem>
     <Separator/>
+    <MenuItem Header="Break on Specific 8-bit Value" Click="WatchValue8Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-008--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on Specific 16-bit Value" Click="WatchValue16Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-016--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on Specific 32-bit Value" Click="WatchValue32Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-032--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on Specific 64-bit Value" Click="WatchValue64Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-064--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
+    <MenuItem Header="Break on 8-bit Value Change" Click="WatchChange8Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-008--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on 16-bit Value Change" Click="WatchChange16Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-016--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on 32-bit Value Change" Click="WatchChange32Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-032--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Break on 64-bit Value Change" Click="WatchChange64Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-064--record.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Scroll to Address in Program" Click="ProgramItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/processor-arrow.png"/>

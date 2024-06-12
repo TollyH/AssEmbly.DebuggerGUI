@@ -385,6 +385,8 @@ namespace AssEmbly.DebuggerGUI
             UpdateMemoryRegionListView();
             UpdateMemoryView();
             UpdateHeapStatsView();
+            UpdateRegisterWatchListView();
+            UpdateMemoryWatchListView();
         }
 
         public void UpdateRegistersView()
@@ -649,6 +651,97 @@ namespace AssEmbly.DebuggerGUI
                 breakpointListSourceLines.Children.Add(new TextBlock()
                 {
                     Text = disassembledLines.GetValueOrDefault(breakpoint.TargetValue).Line,
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
+        public void UpdateRegisterWatchListView()
+        {
+            registerWatchListRegisters.Children.Clear();
+            registerWatchListTypes.Children.Clear();
+            registerWatchListValues.Children.Clear();
+            foreach (IRegisterBreakpoint breakpoint in breakpoints.OfType<IRegisterBreakpoint>().OrderBy(b => b.CheckRegister))
+            {
+                ContextMenus.WatchContextMenu contextMenu = new(breakpoint);
+                contextMenu.WatchRemoved += ContextMenu_WatchRemoved;
+
+                registerWatchListRegisters.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint.CheckRegister.ToString(),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                registerWatchListTypes.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint is RegisterValueBreakpoint
+                        ? "Equal to Value"
+                        : "Value Changes",
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                registerWatchListValues.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint is RegisterValueBreakpoint valueBreakpoint
+                        ? valueBreakpoint.TargetValue.ToString("X16")
+                        : "-",
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
+        public void UpdateMemoryWatchListView()
+        {
+            memoryWatchListAddresses.Children.Clear();
+            memoryWatchListSizes.Children.Clear();
+            memoryWatchListTypes.Children.Clear();
+            memoryWatchListValues.Children.Clear();
+            foreach (IMemoryBreakpoint breakpoint in breakpoints.OfType<IMemoryBreakpoint>().OrderBy(b => b.CheckAddress))
+            {
+                ContextMenus.WatchContextMenu contextMenu = new(breakpoint);
+                contextMenu.WatchRemoved += ContextMenu_WatchRemoved;
+
+                memoryWatchListAddresses.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint.CheckAddress.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                memoryWatchListSizes.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint.CheckSize.ToString(),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                memoryWatchListTypes.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint is MemoryValueBreakpoint
+                        ? "Equal to Value"
+                        : "Value Changes",
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                memoryWatchListValues.Children.Add(new TextBlock()
+                {
+                    Text = breakpoint is MemoryValueBreakpoint valueBreakpoint
+                        ? valueBreakpoint.TargetValue.ToString("X16")
+                        : "-",
                     Foreground = Brushes.White,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
@@ -1034,6 +1127,14 @@ namespace AssEmbly.DebuggerGUI
                     contextMenu.AddressSaved += ContextMenu_AddressSaved;
                     contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
                     contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                    contextMenu.Value8WatchAdded += MemoryContextMenu_Value8WatchAdded;
+                    contextMenu.Value16WatchAdded += MemoryContextMenu_Value16WatchAdded;
+                    contextMenu.Value32WatchAdded += MemoryContextMenu_Value32WatchAdded;
+                    contextMenu.Value64WatchAdded += MemoryContextMenu_Value64WatchAdded;
+                    contextMenu.Change8WatchAdded += MemoryContextMenu_Change8WatchAdded;
+                    contextMenu.Change16WatchAdded += MemoryContextMenu_Change16WatchAdded;
+                    contextMenu.Change32WatchAdded += MemoryContextMenu_Change32WatchAdded;
+                    contextMenu.Change64WatchAdded += MemoryContextMenu_Change64WatchAdded;
 
                     TextBlock dataBlock = new()
                     {
@@ -1622,6 +1723,11 @@ namespace AssEmbly.DebuggerGUI
 
         private void ContextMenu_BreakpointRemoved(ContextMenus.BreakpointListContextMenu sender)
         {
+            if (sender.Breakpoint is null)
+            {
+                return;
+            }
+
             _ = breakpoints.Remove(sender.Breakpoint);
             UpdateAllInformation();
         }
@@ -1982,6 +2088,210 @@ namespace AssEmbly.DebuggerGUI
             ScrollAndSelectMemoryOffset(DebuggingProcessor.Registers[(int)sender.RepresentedRegister]);
             // Switch to memory view
             memoryTabControl.SelectedIndex = 0;
+        }
+
+        private void ContextMenu_WatchRemoved(ContextMenus.WatchContextMenu sender)
+        {
+            if (sender.Watch is null)
+            {
+                return;
+            }
+
+            _ = breakpoints.Remove(sender.Watch);
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_ValueWatchAdded(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            if (value is not null)
+            {
+                _ = breakpoints.Add(new RegisterValueBreakpoint(sender.RepresentedRegister, (ulong)value.Value));
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_ChangeWatchAdded(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            _ = breakpoints.Add(new RegisterChangedBreakpoint(sender.RepresentedRegister,
+                DebuggingProcessor.Registers[(int)sender.RepresentedRegister]));
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Value8WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("An 8-bit watch cannot be created here. At least 1 byte of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            if (value is not null)
+            {
+                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Byte, (byte)value.Value));
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Value16WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 2)
+            {
+                ShowErrorDialog("A 16-bit watch cannot be created here. At least 2 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            if (value is not null)
+            {
+                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Word, (ushort)value.Value));
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Value32WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 4)
+            {
+                ShowErrorDialog("A 32-bit watch cannot be created here. At least 4 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            if (value is not null)
+            {
+                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.DoubleWord, (uint)value.Value));
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Value64WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 8)
+            {
+                ShowErrorDialog("A 64-bit watch cannot be created here. At least 8 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            long? value = AskHexadecimalNumber("Enter the value to break when equal to in hexadecimal", "New Watch");
+            if (value is not null)
+            {
+                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.QuadWord, (ulong)value.Value));
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Change8WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("An 8-bit watch cannot be created here. At least 1 byte of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Byte,
+                DebuggingProcessor.Memory[sender.Address]));
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Change16WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 2)
+            {
+                ShowErrorDialog("A 16-bit watch cannot be created here. At least 2 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Word,
+                BinaryPrimitives.ReadUInt16LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Change32WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 4)
+            {
+                ShowErrorDialog("A 32-bit watch cannot be created here. At least 4 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.DoubleWord,
+                BinaryPrimitives.ReadUInt32LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Change64WatchAdded(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 8)
+            {
+                ShowErrorDialog("A 64-bit watch cannot be created here. At least 8 bytes of memory is required.", "Watch Creation Failed");
+                return;
+            }
+
+            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.QuadWord,
+                BinaryPrimitives.ReadUInt64LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
+
+            UpdateAllInformation();
         }
     }
 }

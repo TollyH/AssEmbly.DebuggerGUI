@@ -8,13 +8,13 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
     /// </summary>
     public partial class BreakpointListContextMenu : ContextMenu, IAddressContextMenu
     {
-        public RegisterValueBreakpoint Breakpoint { get; }
+        public RegisterValueBreakpoint? Breakpoint { get; }
 
         public ulong Address
         {
             get
             {
-                if (Breakpoint.CheckRegister != Register.rpo)
+                if (Breakpoint?.CheckRegister != Register.rpo)
                 {
                     throw new InvalidOperationException(
                         "This breakpoint has no associated address as it is not targeted to the rpo register.");
