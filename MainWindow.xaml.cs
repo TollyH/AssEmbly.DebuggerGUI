@@ -387,6 +387,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateHeapStatsView();
             UpdateRegisterWatchListView();
             UpdateMemoryWatchListView();
+            UpdateCallStackView();
         }
 
         public void UpdateRegistersView()
@@ -1057,6 +1058,75 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateCallStackView()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            callStackAddresses.Children.Clear();
+            callStackLabels.Children.Clear();
+
+            callStackAddresses.Children.Add(new TextBlock()
+            {
+                Text = "<current frame>",
+                Foreground = Brushes.White,
+                FontFamily = codeFont,
+                Margin = new Thickness(5, 1, 5, 0)
+            });
+
+            ulong currentAddress = DebuggingProcessor.Registers[(int)Register.rpo];
+            List<KeyValuePair<string, ulong>> currentLabels = labels.Where(kv => kv.Value <= currentAddress).ToList();
+            if (currentLabels.Count >= 1)
+            {
+                KeyValuePair<string, ulong> closestPriorLabel = currentLabels.MaxBy(kv => kv.Value);
+                callStackLabels.Children.Add(new TextBlock()
+                {
+                    Text = $":{closestPriorLabel.Key} + 0x{currentAddress - closestPriorLabel.Value:X}",
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0)
+                });
+            }
+
+            for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - 16;
+                stackBase = DebuggingProcessor!.ReadMemoryQWord(stackBase))
+            {
+                ulong returnAddress = DebuggingProcessor.ReadMemoryQWord(stackBase + 8);
+
+                ContextMenus.StackContextMenu contextMenu = new(returnAddress);
+                contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
+
+                callStackAddresses.Children.Add(new TextBlock()
+                {
+                    Text = returnAddress.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+
+                List<KeyValuePair<string, ulong>> priorLabels = labels.Where(kv => kv.Value <= returnAddress).ToList();
+                if (priorLabels.Count >= 1)
+                {
+                    KeyValuePair<string, ulong> closestPriorLabel = priorLabels.MaxBy(kv => kv.Value);
+                    callStackLabels.Children.Add(new TextBlock()
+                    {
+                        Text = $":{closestPriorLabel.Key} + 0x{returnAddress - closestPriorLabel.Value:X}",
+                        Foreground = Brushes.White,
+                        FontFamily = codeFont,
+                        Margin = new Thickness(5, 1, 5, 0),
+                        ContextMenu = contextMenu
+                    });
+                }
+            }
+        }
+
         public void ReloadDisassemblyView()
         {
             programBytesPanel.Children.Clear();
@@ -1240,10 +1310,7 @@ namespace AssEmbly.DebuggerGUI
             if (!labels.TryAdd(name, address))
             {
                 ShowErrorDialog($"A label with the name \"{name}\" already exists", "Label Creation Failed");
-                return;
             }
-
-            UpdateLabelListView();
         }
 
         private void SaveAddressPromptName(ulong address)
@@ -1260,8 +1327,6 @@ namespace AssEmbly.DebuggerGUI
             }
 
             savedAddresses[address] = name;
-
-            UpdateSavedAddressListView();
         }
 
         private void PromptInstructionPatch(ulong address, bool continuous)
@@ -1825,6 +1890,8 @@ namespace AssEmbly.DebuggerGUI
             }
 
             CreateLabelPromptName((ulong)value);
+
+            UpdateAllInformation();
         }
 
         private void ContextMenu_LabelRemoved(ContextMenus.LabelListContextMenu sender)
@@ -1925,6 +1992,8 @@ namespace AssEmbly.DebuggerGUI
             }
 
             SaveAddressPromptName((ulong)value);
+
+            UpdateAllInformation();
         }
 
         private void ContextMenu_AddressRemoved(ContextMenus.IAddressContextMenu sender)

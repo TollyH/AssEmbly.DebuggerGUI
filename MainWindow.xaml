@@ -202,8 +202,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Source Line" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Source Line" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="breakpointListAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="breakpointListSourceLines" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -225,10 +225,10 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Start Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="End Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Length" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Start Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="End Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Length" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="regionListStartAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="regionListEndAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="2" x:Name="regionListLengths" Margin="0,30,0,0"/>
@@ -255,8 +255,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Name" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Name" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="labelsListNames" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="labelsListAddresses" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -500,9 +500,9 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Register" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Register" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="registerWatchListRegisters" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="registerWatchListTypes" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="2" x:Name="registerWatchListValues" Margin="0,30,0,0"/>
@@ -655,10 +655,10 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Size" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Size" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="2" Background="#3F000000" Foreground="White" Text="Type" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="3" Background="#3F000000" Foreground="White" Text="Value" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="memoryWatchListAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="memoryWatchListSizes" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="2" x:Name="memoryWatchListTypes" Margin="0,30,0,0"/>
@@ -685,8 +685,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top" Height="30"/>
-                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Description" Padding="10,5" VerticalAlignment="Top" Height="30"/>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Description" Padding="10,5" VerticalAlignment="Top"/>
                             <StackPanel Grid.Column="0" x:Name="savedAddressListAddresses" Margin="0,30,0,0"/>
                             <StackPanel Grid.Column="1" x:Name="savedAddressListDescriptions" Margin="0,30,0,0"/>
                             <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
@@ -736,6 +736,19 @@
                             <TextBlock Text="Call Stack" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <ScrollViewer>
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Background="#3F000000" Foreground="White" Text="Return Address" Padding="10,5" VerticalAlignment="Top"/>
+                            <TextBlock Grid.Column="1" Background="#3F000000" Foreground="White" Text="Closest Prior Label" Padding="10,5" VerticalAlignment="Top"/>
+                            <StackPanel Grid.Column="0" x:Name="callStackAddresses" Margin="0,30,0,0"/>
+                            <StackPanel Grid.Column="1" x:Name="callStackLabels" Margin="0,30,0,0"/>
+                            <GridSplitter Grid.Column="0" ResizeDirection="Columns" Width="2" Background="#AA000000"/>
+                        </Grid>
+                    </ScrollViewer>
                 </TabItem>
             </TabControl>
         </Grid>
