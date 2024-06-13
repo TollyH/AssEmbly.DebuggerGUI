@@ -188,6 +188,7 @@ namespace AssEmbly.DebuggerGUI
                     forceV1.IsChecked ?? false, mapStack.IsChecked ?? true, autoEcho.IsChecked ?? false);
                 DebuggingProcessor.LoadProgram(program);
                 processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher, consoleOutput, consoleInput);
+                labels["ENTRY"] = entryPoint;
                 UpdateRunningState(RunningState.Paused);
             }
             catch (Exception exc)
@@ -2100,7 +2101,7 @@ namespace AssEmbly.DebuggerGUI
             }
 
             SelectedMemoryAddress = (ulong)((FrameworkElement)sender).Tag;
-            UpdateAllInformation();
+            UpdateMemoryView();
         }
 
         private void ContextMenu_MemoryScrolled(ContextMenus.IAddressContextMenu sender)
