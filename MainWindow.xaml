@@ -109,6 +109,12 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
+            <MenuItem Padding="0" ToolTip="Save Selected Memory Address" Click="SaveAddressItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
             <MenuItem Padding="0" ToolTip="Trigger Disassembly from Current Position" Click="DisassemblePartialItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/compile.png"/>
@@ -117,28 +123,6 @@
             <MenuItem Padding="0" ToolTip="Trigger Disassembly of Whole Program" Click="DisassembleFullItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/compile-error.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <Separator/>
-            <MenuItem Padding="0" ToolTip="Save Selected Memory Address" Click="SaveAddressItem_Click">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Padding="0" ToolTip="Edit Memory at Selected Address">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/memory-pencil.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <Separator/>
-            <MenuItem Padding="0" ToolTip="Edit Registers">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/drawer--pencil.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Padding="0" ToolTip="Edit Status Flags">
-                <MenuItem.Icon>
-                    <Image Source="pack://application:,,,/Icons/flag--pencil.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
