@@ -65,6 +65,8 @@ namespace AssEmbly.DebuggerGUI
         private readonly Dictionary<ulong, int> currentMaxArrowIndentation = new();
         private readonly Dictionary<ulong, int> currentlyRenderedPointerArrows = new();
 
+        private readonly Dictionary<ulong, int> currentlyRenderedStackItems = new();
+
         private readonly FontFamily codeFont = new("Consolas");
 
         private readonly SyntaxHighlighting highlighter = new();
@@ -389,6 +391,7 @@ namespace AssEmbly.DebuggerGUI
             UpdateRegisterWatchListView();
             UpdateMemoryWatchListView();
             UpdateCallStackView();
+            UpdateStackView();
         }
 
         public void UpdateRegistersView()
@@ -500,7 +503,7 @@ namespace AssEmbly.DebuggerGUI
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
                     lineBlock.Visibility = Visibility.Visible;
                     lineBlock.Text = addressRange.Start.ToString("X16");
-                    lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor?.Registers[(int)Register.rpo]
+                    lineBlock.Foreground = (ulong)addressRange.Start == DebuggingProcessor.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White;
                     ((ContextMenus.ProgramContextMenu)lineBlock.ContextMenu!).Address = (ulong)addressRange.Start;
@@ -643,7 +646,7 @@ namespace AssEmbly.DebuggerGUI
                 breakpointListAddresses.Children.Add(new TextBlock()
                 {
                     Text = breakpoint.TargetValue.ToString("X16"),
-                    Foreground = breakpoint.TargetValue == DebuggingProcessor?.Registers[(int)Register.rpo]
+                    Foreground = breakpoint.TargetValue == DebuggingProcessor!.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
                     FontFamily = codeFont,
@@ -776,7 +779,7 @@ namespace AssEmbly.DebuggerGUI
                 labelsListAddresses.Children.Add(new TextBlock()
                 {
                     Text = address.ToString("X16"),
-                    Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
+                    Foreground = address == DebuggingProcessor!.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
                     FontFamily = codeFont,
@@ -801,7 +804,7 @@ namespace AssEmbly.DebuggerGUI
                 savedAddressListAddresses.Children.Add(new TextBlock()
                 {
                     Text = address.ToString("X16"),
-                    Foreground = address == DebuggingProcessor?.Registers[(int)Register.rpo]
+                    Foreground = address == DebuggingProcessor!.Registers[(int)Register.rpo]
                         ? Brushes.LightCoral
                         : Brushes.White,
                     FontFamily = codeFont,
@@ -1099,6 +1102,8 @@ namespace AssEmbly.DebuggerGUI
             callStackAddresses.Children.Clear();
             callStackLabels.Children.Clear();
 
+            ulong callStackSize = DebuggingProcessor.UseV1CallStack ? 24UL : 16UL;
+
             callStackAddresses.Children.Add(new TextBlock()
             {
                 Text = "<current frame>",
@@ -1122,10 +1127,11 @@ namespace AssEmbly.DebuggerGUI
             }
 
             for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
-                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - 16;
-                stackBase = DebuggingProcessor!.ReadMemoryQWord(stackBase))
+                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - callStackSize;
+                // callStackSize - 16 has no effect (i.e. is 0) when not using V1 call stack compat
+                stackBase = DebuggingProcessor!.ReadMemoryQWord(stackBase + callStackSize - 16))
             {
-                ulong returnAddress = DebuggingProcessor.ReadMemoryQWord(stackBase + 8);
+                ulong returnAddress = DebuggingProcessor.ReadMemoryQWord(stackBase + callStackSize - 8);
 
                 ContextMenus.StackContextMenu contextMenu = new(returnAddress);
                 contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
@@ -1156,6 +1162,113 @@ namespace AssEmbly.DebuggerGUI
                     });
                 }
             }
+        }
+
+        public void UpdateStackView()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            currentlyRenderedStackItems.Clear();
+            stackBracketCanvas.Children.Clear();
+
+            ulong callStackSize = DebuggingProcessor.UseV1CallStack ? 24UL : 16UL;
+            // Get the number of items in the stack
+            stackScroll.Maximum = Math.Floor(
+                ((ulong)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rso]) / 8d);
+
+            // Get the base of every stack frame on the call-stack
+            HashSet<ulong> stackBases = new();
+            for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - callStackSize;
+                // callStackSize - 16 has no effect (i.e. is 0) when not using V1 call stack compat
+                stackBase = DebuggingProcessor.ReadMemoryQWord(stackBase + callStackSize - 16))
+            {
+                stackBases.Add(stackBase);
+            }
+
+            ulong startAddress = DebuggingProcessor.Registers[(int)Register.rso] + ((ulong)stackScroll.Value * 8);
+            for (int i = 0; i < stackValuePanel.Children.Count; i++)
+            {
+                ulong address = startAddress + ((ulong)i * 8);
+                if (address > (ulong)DebuggingProcessor!.Memory.Length - 8)
+                {
+                    stackAddressesPanel.Children[i].Visibility = Visibility.Collapsed;
+                    stackValuePanel.Children[i].Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    currentlyRenderedStackItems[address] = i;
+
+                    TextBlock addressBlock = (TextBlock)stackAddressesPanel.Children[i];
+                    addressBlock.Visibility = Visibility.Visible;
+                    addressBlock.Text = address.ToString("X16");
+                    addressBlock.Foreground = address == DebuggingProcessor.Registers[(int)Register.rso]
+                        ? Brushes.LightCoral
+                        : Brushes.White;
+                    ((ContextMenus.StackContextMenu)addressBlock.ContextMenu!).Address = address;
+
+                    TextBlock valueBlock = (TextBlock)stackValuePanel.Children[i];
+                    valueBlock.Visibility = Visibility.Visible;
+                    if (stackBases.Contains(address) && address <= (ulong)DebuggingProcessor.Memory.Length - callStackSize)
+                    {
+                        // Decode return information
+                        if (callStackSize == 24)
+                        {
+                            // V1 call stack compatibility
+                            valueBlock.Text = $"Return rso to {DebuggingProcessor.ReadMemoryQWord(address):X16}";
+                            valueBlock.Foreground = Brushes.LightGreen;
+                            ((ContextMenus.StackContextMenu)valueBlock.ContextMenu!).Address = address;
+
+                            address += 8;
+                            i++;
+                        }
+
+                        if (i < stackValuePanel.Children.Count)
+                        {
+                            currentlyRenderedStackItems[address] = i;
+                            valueBlock = (TextBlock)stackValuePanel.Children[i];
+                            valueBlock.Visibility = Visibility.Visible;
+                            valueBlock.Text = $"Return rsb to {DebuggingProcessor.ReadMemoryQWord(address):X16}";
+                            valueBlock.Foreground = Brushes.LightGreen;
+                            ((ContextMenus.StackContextMenu)valueBlock.ContextMenu!).Address = address;
+
+                            addressBlock = (TextBlock)stackAddressesPanel.Children[i];
+                            addressBlock.Visibility = Visibility.Visible;
+                            addressBlock.Text = address.ToString("X16");
+                            ((ContextMenus.StackContextMenu)addressBlock.ContextMenu!).Address = address;
+
+                            address += 8;
+                            i++;
+                        }
+
+                        if (i < stackValuePanel.Children.Count)
+                        {
+                            currentlyRenderedStackItems[address] = i;
+                            valueBlock = (TextBlock)stackValuePanel.Children[i];
+                            valueBlock.Visibility = Visibility.Visible;
+                            valueBlock.Text = $"Return rpo to {DebuggingProcessor.ReadMemoryQWord(address):X16}";
+                            valueBlock.Foreground = Brushes.LightGreen;
+                            ((ContextMenus.StackContextMenu)valueBlock.ContextMenu!).Address = address;
+
+                            addressBlock = (TextBlock)stackAddressesPanel.Children[i];
+                            addressBlock.Visibility = Visibility.Visible;
+                            addressBlock.Text = address.ToString("X16");
+                            ((ContextMenus.StackContextMenu)addressBlock.ContextMenu!).Address = address;
+                        }
+                    }
+                    else
+                    {
+                        valueBlock.Text = DebuggingProcessor.ReadMemoryQWord(address).ToString("X16");
+                        valueBlock.Foreground = Brushes.White;
+                        ((ContextMenus.StackContextMenu)valueBlock.ContextMenu!).Address = address;
+                    }
+                }
+            }
+
+            // TODO: UpdateStackBrackets();
         }
 
         public void ReloadDisassemblyView()
@@ -1289,6 +1402,46 @@ namespace AssEmbly.DebuggerGUI
             memoryScroll.ViewportSize = lineCount;
 
             UpdateMemoryView();
+        }
+
+        public void ReloadStackView()
+        {
+            stackAddressesPanel.Children.Clear();
+            stackValuePanel.Children.Clear();
+
+            int lineCount = (int)(stackGrid.ActualHeight / lineHeight);
+            for (int i = 0; i < lineCount; i++)
+            {
+                ContextMenus.StackContextMenu contextMenu = new();
+                contextMenu.AddressSaved += ContextMenu_AddressSaved;
+                contextMenu.LabelAdded += ContextMenu_LabelAddedWithAddress;
+                contextMenu.ProgramScrolled += ContextMenu_ProgramScrolled;
+                contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
+
+                stackAddressesPanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontFamily = codeFont,
+                    Height = lineHeight,
+                    ContextMenu = contextMenu
+                });
+                stackValuePanel.Children.Add(new TextBlock()
+                {
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5, 0, 0, 0),
+                    FontFamily = codeFont,
+                    Height = lineHeight,
+                    ContextMenu = contextMenu
+                });
+            }
+
+            stackScroll.ViewportSize = lineCount;
+
+            UpdateDisassemblyView();
         }
 
         public void UpdateRunningState(RunningState state)
@@ -2435,6 +2588,27 @@ namespace AssEmbly.DebuggerGUI
                 BinaryPrimitives.ReadUInt64LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
 
             UpdateAllInformation();
+        }
+
+        private void StackGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ReloadStackView();
+        }
+
+        private void StackGrid_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            stackScroll.Value -= Math.CopySign(stackScroll.ActualHeight / lineHeight / 4, e.Delta);
+            UpdateStackView();
+        }
+
+        private void stackScroll_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            UpdateStackView();
+        }
+
+        private void stackBracketCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateStackView();
         }
     }
 }

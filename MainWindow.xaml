@@ -712,6 +712,20 @@
                             <TextBlock Text="Stack" Margin="5,0,0,0" Foreground="White"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <Grid x:Name="stackGrid" Background="Transparent" SizeChanged="StackGrid_SizeChanged" MouseWheel="StackGrid_MouseWheel">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+                        <Canvas x:Name="stackBracketCanvas" Grid.Column="0" ClipToBounds="True" SizeChanged="stackBracketCanvas_SizeChanged" SnapsToDevicePixels="True"/>
+                        <Border Grid.Column="1" BorderBrush="#7F000000" BorderThickness="1,0">
+                            <StackPanel x:Name="stackAddressesPanel" Background="#26FFFFFF"/>
+                        </Border>
+                        <StackPanel x:Name="stackValuePanel" Grid.Column="2"/>
+                        <ScrollBar x:Name="stackScroll" Grid.Column="3" SmallChange="1" Scroll="stackScroll_Scroll"/>
+                    </Grid>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
