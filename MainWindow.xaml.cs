@@ -901,8 +901,6 @@ namespace AssEmbly.DebuggerGUI
                 }
             }
 
-            HashSet<ulong> pointedAddresses = DebuggingProcessor.Registers.ToHashSet();
-
             int startAddressIndex = (int)memoryScroll.Value;
             for (int i = 0; i < memoryAddressPanel.Children.Count; i++)
             {
@@ -937,12 +935,42 @@ namespace AssEmbly.DebuggerGUI
                         ulong? oldAddress = (ulong?)dataBlock.Tag;
                         bool sameAddress = oldAddress is not null && oldAddress == (ulong)address;
 
+                        string tooltip = $"Int8: {(sbyte)data}\nUInt8: {data}";
+                        if (address <= DebuggingProcessor.Memory.Length - 2)
+                        {
+                            ushort word = DebuggingProcessor.ReadMemoryWord((ulong)address);
+                            tooltip += $"\n\nInt16: {(short)word}\nUInt16: {word}";
+                        }
+                        if (address <= DebuggingProcessor.Memory.Length - 4)
+                        {
+                            uint doubleWord = DebuggingProcessor.ReadMemoryDWord((ulong)address);
+                            tooltip += $"\n\nInt32: {(int)doubleWord}\nUInt32: {doubleWord}";
+                        }
+                        if (address <= DebuggingProcessor.Memory.Length - 8)
+                        {
+                            ulong quadWord = DebuggingProcessor.ReadMemoryQWord((ulong)address);
+                            tooltip += $"\n\nInt64: {(long)quadWord}\nUInt64: {quadWord}" +
+                                $"\n\nFloat64: {BitConverter.UInt64BitsToDouble(quadWord)}";
+                        }
+                        bool anyRegistersPoint = false;
+                        foreach (Register register in Enum.GetValues<Register>()
+                            .Where(r => DebuggingProcessor.Registers[(int)r] == (ulong)address))
+                        {
+                            if (!anyRegistersPoint)
+                            {
+                                // First pointer message is separated by 2 newlines instead of 1
+                                tooltip += '\n';
+                                anyRegistersPoint = true;
+                            }
+                            tooltip += $"\n{register} points here";
+                        }
+
                         string dataText = data.ToString("X2");
                         SolidColorBrush foreground = sameAddress && dataText != dataBlock.Text
                             ? Brushes.LightCoral  // Data changed
                             : watchedAddresses.Contains((ulong)address)
                                 ? Brushes.Turquoise  // Data watched
-                                : pointedAddresses.Contains((ulong)address)
+                                : anyRegistersPoint
                                     ? Brushes.LawnGreen  // Data pointed to by register
                                     : savedAddresses.ContainsKey((ulong)address)
                                         ? Brushes.Gold  // Address is saved
@@ -950,6 +978,7 @@ namespace AssEmbly.DebuggerGUI
 
                         dataBlock.Visibility = Visibility.Visible;
                         dataBlock.Text = dataText;
+                        dataBlock.ToolTip = tooltip;
                         dataBlock.Background = background;
                         dataBlock.Foreground = foreground;
                         dataBlock.Tag = (ulong)address;
@@ -958,6 +987,7 @@ namespace AssEmbly.DebuggerGUI
                         asciiBlock.Visibility = Visibility.Visible;
                         // >= ' ' and <= '~'
                         asciiBlock.Text = data is >= 32 and <= 126 ? ((char)data).ToString() : ".";
+                        asciiBlock.ToolTip = tooltip;
                         asciiBlock.Background = background;
                         asciiBlock.Foreground = foreground;
                         asciiBlock.Tag = (ulong)address;
