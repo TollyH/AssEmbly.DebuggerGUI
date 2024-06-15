@@ -1107,7 +1107,7 @@ namespace AssEmbly.DebuggerGUI
                                 : anyRegistersPoint
                                     ? Brushes.LawnGreen  // Data pointed to by register
                                     : savedAddresses.ContainsKey((ulong)address)
-                                        ? Brushes.MediumPurple  // Address is saved
+                                        ? Brushes.Violet  // Address is saved
                                         : watchedAddresses.Contains((ulong)address)
                                             ? Brushes.Turquoise  // Data watched
                                             : Brushes.White;
