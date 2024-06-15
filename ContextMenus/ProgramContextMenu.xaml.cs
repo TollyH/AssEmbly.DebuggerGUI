@@ -18,6 +18,7 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? Jumped;
         public event EventDelegate? Edited;
         public event EventDelegate? MemoryScrolled;
+        public event EventDelegate? AddressCopied;
 
         public ProgramContextMenu()
         {
@@ -62,6 +63,11 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void MemoryItem_Click(object sender, RoutedEventArgs e)
         {
             MemoryScrolled?.Invoke(this);
+        }
+
+        private void CopyAddressItem_Click(object sender, RoutedEventArgs e)
+        {
+            AddressCopied?.Invoke(this);
         }
     }
 }

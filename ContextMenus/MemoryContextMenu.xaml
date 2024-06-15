@@ -9,6 +9,17 @@
     <ContextMenu.Resources>
         <Style TargetType="local:MemoryContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>
+    <MenuItem Header="Copy Address" Click="CopyAddressItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/document-copy.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Copy Value" Click="CopyValueItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/document-copy.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Edit 8-bit Value" Click="Edit8Item_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/processor-bit-008--pencil.png"/>

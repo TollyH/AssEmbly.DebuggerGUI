@@ -9,6 +9,12 @@
     <ContextMenu.Resources>
         <Style TargetType="local:RegisterContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>
+    <MenuItem Header="Copy Value" Click="CopyValueItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/document-copy.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Edit Value" Click="EditItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/drawer--pencil.png"/>

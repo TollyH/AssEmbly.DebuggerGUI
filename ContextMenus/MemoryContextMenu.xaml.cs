@@ -31,6 +31,8 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? PersistentEdited32;
         public event EventDelegate? Edited64;
         public event EventDelegate? PersistentEdited64;
+        public event EventDelegate? AddressCopied;
+        public event EventDelegate? ValueCopied;
 
         public MemoryContextMenu()
         {
@@ -140,6 +142,16 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void EditPersistent64Item_Click(object sender, RoutedEventArgs e)
         {
             PersistentEdited64?.Invoke(this);
+        }
+
+        private void CopyAddressItem_Click(object sender, RoutedEventArgs e)
+        {
+            AddressCopied?.Invoke(this);
+        }
+
+        private void CopyValueItem_Click(object sender, RoutedEventArgs e)
+        {
+            ValueCopied?.Invoke(this);
         }
     }
 }

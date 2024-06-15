@@ -1452,6 +1452,7 @@ namespace AssEmbly.DebuggerGUI
                 contextMenu.BreakpointToggled += ContextMenu_BreakpointToggled;
                 contextMenu.Edited += ContextMenu_Edited;
                 contextMenu.MemoryScrolled += ContextMenu_MemoryScrolled;
+                contextMenu.AddressCopied += ContextMenu_AddressCopied;
 
                 BreakpointButton breakpointButton = new()
                 {
@@ -1555,6 +1556,8 @@ namespace AssEmbly.DebuggerGUI
                     contextMenu.PersistentEdited32 += MemoryContextMenu_PersistentEdited32;
                     contextMenu.Edited64 += MemoryContextMenu_Edited64;
                     contextMenu.PersistentEdited64 += MemoryContextMenu_PersistentEdited64;
+                    contextMenu.AddressCopied += ContextMenu_AddressCopied;
+                    contextMenu.ValueCopied += MemoryContextMenu_ValueCopied;
 
                     TextBlock dataBlock = new()
                     {
@@ -3107,6 +3110,31 @@ namespace AssEmbly.DebuggerGUI
         {
             _ = persistentRegisterEdits.Remove(sender.RepresentedRegister);
             UpdateAllInformation();
+        }
+
+        private void ContextMenu_AddressCopied(ContextMenus.IAddressContextMenu sender)
+        {
+            Clipboard.SetText(sender.Address.ToString("X16"));
+        }
+
+        private void RegisterContextMenu_ValueCopied(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            Clipboard.SetText(DebuggingProcessor.Registers[(int)sender.RepresentedRegister].ToString("X16"));
+        }
+
+        private void MemoryContextMenu_ValueCopied(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            Clipboard.SetText(DebuggingProcessor.Memory[sender.Address].ToString("X2"));
         }
     }
 }

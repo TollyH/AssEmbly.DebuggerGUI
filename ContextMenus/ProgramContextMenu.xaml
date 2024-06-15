@@ -9,11 +9,18 @@
     <ContextMenu.Resources>
         <Style TargetType="local:ProgramContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>
+    <MenuItem Header="Copy Address" Click="CopyAddressItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/document-copy.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Toggle Breakpoint" Click="BreakpointItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/control-record.png"/>
         </MenuItem.Icon>
     </MenuItem>
+    <Separator/>
     <MenuItem Header="Add New Label" Click="LabelItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/tag--plus.png"/>

@@ -27,6 +27,7 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? ChangeWatchAdded;
         public event EventDelegate? Edited;
         public event EventDelegate? PersistentEdited;
+        public event EventDelegate? ValueCopied;
 
         public RegisterContextMenu()
         {
@@ -74,6 +75,11 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void EditPersistentItem_Click(object sender, RoutedEventArgs e)
         {
             PersistentEdited?.Invoke(this);
+        }
+
+        private void CopyValueItem_Click(object sender, RoutedEventArgs e)
+        {
+            ValueCopied?.Invoke(this);
         }
     }
 }
