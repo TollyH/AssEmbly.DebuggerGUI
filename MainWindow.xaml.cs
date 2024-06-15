@@ -249,6 +249,14 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
+        public void ReloadLastExecutable()
+        {
+            if (lastOpenedPath is not null)
+            {
+                LoadExecutable(lastOpenedPath);
+            }
+        }
+
         private void ReloadDisassemblyAfterPosition(int start)
         {
             if (DebuggingProcessor is null)
@@ -358,10 +366,69 @@ namespace AssEmbly.DebuggerGUI
             ReloadDisassemblyAfterPosition((int)offset);
         }
 
+        public void DisassembleFromCurrentOffset()
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo], true);
+            UpdateDisassemblyView();
+        }
+
         public void BreakExecution()
         {
             cancellationTokenSource.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public void ResumeExecution()
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, OnInstructionExecution, breakpoints, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
+        }
+
+        public void StepIn()
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteSingleInstruction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
+        }
+
+        public void StepOver()
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteOverFunction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
+        }
+
+        public void StepOut()
+        {
+            if (processorRunner is null)
+            {
+                return;
+            }
+            if (processorRunner.ExecuteUntilReturn(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
+            {
+                UpdateRunningState(RunningState.Running);
+            }
         }
 
         public void UnloadExecutable()
@@ -1880,6 +1947,16 @@ namespace AssEmbly.DebuggerGUI
             programJumpArrowCanvas.Children.Add(registerNameLabel);
         }
 
+        private void CreateBreakpointAtCurrentOffset()
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
+            UpdateAllInformation();
+        }
+
         private void ApplyPersistentEdits()
         {
             if (DebuggingProcessor is null)
@@ -2054,6 +2131,124 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        private void PromptOpenExecutableFile()
+        {
+            OpenFileDialog dialog = new()
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "Assembled AssEmbly Programs (*.aap)|*.aap|All file types|*",
+                Title = "Open Executable"
+            };
+            if (dialog.ShowDialog(this) ?? false)
+            {
+                LoadExecutable(dialog.FileName);
+            }
+        }
+
+        private void PromptOpenRawExecutableFile()
+        {
+            OpenFileDialog dialog = new()
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "All file types|*",
+                Title = "Open Raw Executable"
+            };
+            if (dialog.ShowDialog(this) ?? false)
+            {
+                LoadRawExecutable(dialog.FileName);
+            }
+        }
+
+        private void PromptOpenADIFile()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            OpenFileDialog dialog = new()
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "AssEmbly Debug Information (*.adi)|*.adi|All file types|*",
+                Title = "Open Debug Information File"
+            };
+            if (dialog.ShowDialog(this) ?? false)
+            {
+                LoadADI(dialog.FileName);
+            }
+        }
+
+        private void PromptScrollToProgramOffset()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? address = PromptNumberInput("Enter program offset to scroll to", "Enter Offset");
+            if (address is not null)
+            {
+                ScrollToProgramOffset((ulong)address);
+                // Switch to program view
+                mainTabControl.SelectedIndex = 0;
+            }
+        }
+
+        private void PromptScrollAndSelectMemoryOffset()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? address = PromptNumberInput("Enter memory address to scroll to", "Enter Address");
+            if (address is not null)
+            {
+                ScrollAndSelectMemoryOffset((ulong)address);
+                // Switch to memory view
+                memoryTabControl.SelectedIndex = 0;
+            }
+        }
+
+        private void PromptCreateLabelAtCurrentOffset()
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            CreateLabelPromptName(DebuggingProcessor.Registers[(int)Register.rpo]);
+
+            UpdateAllInformation();
+        }
+
+        private void PromptPatchCurrentInstruction()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            PromptInstructionPatch(DebuggingProcessor.Registers[(int)Register.rpo], true);
+
+            UpdateAllInformation();
+        }
+
+        private void PromptSaveSelectedAddress()
+        {
+            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
+            {
+                return;
+            }
+
+            SaveAddressPromptName(SelectedMemoryAddress);
+
+            UpdateAllInformation();
+        }
+
         private IEnumerable<ulong> EnumerateStackBases()
         {
             if (DebuggingProcessor is null)
@@ -2072,7 +2267,7 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        private void AboutItem_Click(object sender, RoutedEventArgs e)
+        private void OpenAboutWindowDialog()
         {
             AboutWindow window = new()
             {
@@ -2081,46 +2276,24 @@ namespace AssEmbly.DebuggerGUI
             window.ShowDialog();
         }
 
+        private void AboutItem_Click(object sender, RoutedEventArgs e)
+        {
+            OpenAboutWindowDialog();
+        }
+
         private void OpenItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new()
-            {
-                CheckFileExists = true,
-                CheckPathExists = true,
-                Filter = "Assembled AssEmbly Programs (*.aap)|*.aap|All file types|*",
-                Title = "Open Executable"
-            };
-            if (dialog.ShowDialog(this) ?? false)
-            {
-                LoadExecutable(dialog.FileName);
-            }
+            PromptOpenExecutableFile();
         }
 
         private void OpenRawItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new()
-            {
-                CheckFileExists = true,
-                CheckPathExists = true,
-                Filter = "All file types|*",
-                Title = "Open Raw Executable"
-            };
-            if (dialog.ShowDialog(this) ?? false)
-            {
-                LoadRawExecutable(dialog.FileName);
-            }
+            PromptOpenRawExecutableFile();
         }
 
         private void StepInItem_Click(object sender, RoutedEventArgs e)
         {
-            if (processorRunner is null)
-            {
-                return;
-            }
-            if (processorRunner.ExecuteSingleInstruction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
-            {
-                UpdateRunningState(RunningState.Running);
-            }
+            StepIn();
         }
 
         private void StopItem_Click(object sender, RoutedEventArgs e)
@@ -2130,10 +2303,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void RestartItem_Click(object sender, RoutedEventArgs e)
         {
-            if (lastOpenedPath is not null)
-            {
-                LoadExecutable(lastOpenedPath);
-            }
+            ReloadLastExecutable();
         }
 
         private void consoleOutputBlock_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -2170,14 +2340,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void ResumeItem_Click(object sender, RoutedEventArgs e)
         {
-            if (processorRunner is null)
-            {
-                return;
-            }
-            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, OnInstructionExecution, breakpoints, cancellationTokenSource.Token))
-            {
-                UpdateRunningState(RunningState.Running);
-            }
+            ResumeExecution();
         }
 
         private void BreakpointButton_Unchecked(object sender, RoutedEventArgs e)
@@ -2200,12 +2363,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void BreakpointItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
-            {
-                return;
-            }
-            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
-            UpdateAllInformation();
+            CreateBreakpointAtCurrentOffset();
         }
 
         private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2307,22 +2465,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void ADIItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null)
-            {
-                return;
-            }
-
-            OpenFileDialog dialog = new()
-            {
-                CheckFileExists = true,
-                CheckPathExists = true,
-                Filter = "AssEmbly Debug Information (*.adi)|*.adi|All file types|*",
-                Title = "Open Debug Information File"
-            };
-            if (dialog.ShowDialog(this) ?? false)
-            {
-                LoadADI(dialog.FileName);
-            }
+            PromptOpenADIFile();
         }
 
         private void ContextMenu_LabelAdded(ContextMenus.LabelListContextMenu sender)
@@ -2351,14 +2494,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void LabelItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
-            {
-                return;
-            }
-
-            CreateLabelPromptName(DebuggingProcessor.Registers[(int)Register.rpo]);
-
-            UpdateAllInformation();
+            PromptCreateLabelAtCurrentOffset();
         }
 
         private void ContextMenu_LabelDisassembling(ContextMenus.LabelListContextMenu sender)
@@ -2372,13 +2508,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void DisassemblePartialItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
-            {
-                return;
-            }
-
-            DisassembleFromProgramOffset(DebuggingProcessor.Registers[(int)Register.rpo], true);
-            UpdateDisassemblyView();
+            DisassembleFromCurrentOffset();
         }
 
         private void DisassembleFullItem_Click(object sender, RoutedEventArgs e)
@@ -2393,38 +2523,17 @@ namespace AssEmbly.DebuggerGUI
 
         private void StepOverItem_Click(object sender, RoutedEventArgs e)
         {
-            if (processorRunner is null)
-            {
-                return;
-            }
-            if (processorRunner.ExecuteOverFunction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
-            {
-                UpdateRunningState(RunningState.Running);
-            }
+            StepOver();
         }
 
         private void StepOutItem_Click(object sender, RoutedEventArgs e)
         {
-            if (processorRunner is null)
-            {
-                return;
-            }
-            if (processorRunner.ExecuteUntilReturn(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
-            {
-                UpdateRunningState(RunningState.Running);
-            }
+            StepOut();
         }
 
         private void SaveAddressItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null || (processorRunner?.IsBusy ?? true))
-            {
-                return;
-            }
-
-            SaveAddressPromptName(SelectedMemoryAddress);
-
-            UpdateAllInformation();
+            PromptSaveSelectedAddress();
         }
 
         private void ContextMenu_AddressAdded(ContextMenus.IAddressContextMenu sender)
@@ -2504,14 +2613,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void PatchItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null)
-            {
-                return;
-            }
-
-            PromptInstructionPatch(DebuggingProcessor.Registers[(int)Register.rpo], true);
-
-            UpdateAllInformation();
+            PromptPatchCurrentInstruction();
         }
 
         private void ContextMenu_Edited(ContextMenus.IAddressContextMenu sender)
@@ -2573,34 +2675,12 @@ namespace AssEmbly.DebuggerGUI
 
         private void GoToProgramItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null)
-            {
-                return;
-            }
-
-            long? address = PromptNumberInput("Enter program offset to scroll to", "Enter Offset");
-            if (address is not null)
-            {
-                ScrollToProgramOffset((ulong)address);
-                // Switch to program view
-                mainTabControl.SelectedIndex = 0;
-            }
+            PromptScrollToProgramOffset();
         }
 
         private void GoToMemoryItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DebuggingProcessor is null)
-            {
-                return;
-            }
-
-            long? address = PromptNumberInput("Enter memory address to scroll to", "Enter Address");
-            if (address is not null)
-            {
-                ScrollAndSelectMemoryOffset((ulong)address);
-                // Switch to memory view
-                memoryTabControl.SelectedIndex = 0;
-            }
+            PromptScrollAndSelectMemoryOffset();
         }
 
         private void RegisterContextMenu_AddressSaved(ContextMenus.RegisterContextMenu sender)
@@ -3135,6 +3215,83 @@ namespace AssEmbly.DebuggerGUI
             }
 
             Clipboard.SetText(DebuggingProcessor.Memory[sender.Address].ToString("X2"));
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (consoleInputBox.IsFocused)
+            {
+                // Don't run keyboard shortcuts while user is typing in the console
+                return;
+            }
+
+            bool consumed = true;
+            switch (e.Key)
+            {
+                case Key.O when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    PromptOpenExecutableFile();
+                    break;
+                case Key.O when e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift):
+                    PromptOpenRawExecutableFile();
+                    break;
+                case Key.O when e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt):
+                    PromptOpenADIFile();
+                    break;
+                case Key.Q when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    UnloadExecutable();
+                    break;
+                case Key.R when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    ReloadLastExecutable();
+                    break;
+                case Key.F5 when e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    ResumeExecution();
+                    break;
+                case Key.C when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    BreakExecution();
+                    break;
+                case Key.F11 when e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    StepIn();
+                    break;
+                // Override default menu select behaviour of F10 key
+                case Key.System when e.SystemKey == Key.F10 && e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    StepOver();
+                    break;
+                case Key.F9 when e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    StepOut();
+                    break;
+                case Key.G when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    PromptScrollToProgramOffset();
+                    break;
+                case Key.G when e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt):
+                    PromptScrollAndSelectMemoryOffset();
+                    break;
+                case Key.B when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    CreateBreakpointAtCurrentOffset();
+                    break;
+                case Key.L when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    PromptCreateLabelAtCurrentOffset();
+                    break;
+                case Key.Space when e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    PromptPatchCurrentInstruction();
+                    break;
+                case Key.S when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    PromptSaveSelectedAddress();
+                    break;
+                case Key.D when e.KeyboardDevice.Modifiers == ModifierKeys.Control:
+                    DisassembleFromCurrentOffset();
+                    break;
+                case Key.D when e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift):
+                    ReloadDisassembly();
+                    break;
+                case Key.F1 when e.KeyboardDevice.Modifiers == ModifierKeys.None:
+                    OpenAboutWindowDialog();
+                    break;
+                default:
+                    consumed = false;
+                    break;
+            }
+
+            e.Handled = consumed;
         }
     }
 }

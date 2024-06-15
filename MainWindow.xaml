@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         xmlns:menu="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png">
+        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png" PreviewKeyDown="Window_PreviewKeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -28,105 +28,105 @@
                     </Setter>
                 </Style>
             </Menu.Resources>
-            <MenuItem Padding="0" ToolTip="Open Executable" Margin="5,0,0,0" Click="OpenItem_Click">
+            <MenuItem Padding="0" ToolTip="Open Executable (CTRL+O)" Margin="5,0,0,0" Click="OpenItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/folder-horizontal-open.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Load Raw Bytes" Click="OpenRawItem_Click">
+            <MenuItem Padding="0" ToolTip="Load Raw Bytes (CTRL+Shift+O)" Click="OpenRawItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/script-binary.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Import ADI File" Click="ADIItem_Click">
+            <MenuItem Padding="0" ToolTip="Import ADI File (CTRL+Alt+O)" Click="ADIItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/script-import.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Stop" Click="StopItem_Click">
+            <MenuItem Padding="0" ToolTip="Stop (CTRL+Q)" Click="StopItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-stop-square.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Restart" Click="RestartItem_Click">
+            <MenuItem Padding="0" ToolTip="Restart (CTRL+R)" Click="RestartItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-circle.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Run to Breakpoint" Click="ResumeItem_Click">
+            <MenuItem Padding="0" ToolTip="Run to Breakpoint (F5)" Click="ResumeItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Break" Click="BreakItem_Click">
+            <MenuItem Padding="0" ToolTip="Break (CTRL+C)" Click="BreakItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-pause.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Step In" Click="StepInItem_Click">
+            <MenuItem Padding="0" ToolTip="Step In (F11)" Click="StepInItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Step Over (Ignore Breakpoints)" Click="StepOverItem_Click">
+            <MenuItem Padding="0" ToolTip="Step Over (Ignore Breakpoints - F10)" Click="StepOverItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step-over.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Step Out (Ignore Breakpoints)" Click="StepOutItem_Click">
+            <MenuItem Padding="0" ToolTip="Step Out (Ignore Breakpoints - F9)" Click="StepOutItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-step-out.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Go To Program Offset" Click="GoToProgramItem_Click">
+            <MenuItem Padding="0" ToolTip="Go To Program Offset (CTRL+G)" Click="GoToProgramItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/processor-arrow.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Go To Memory Address" Click="GoToMemoryItem_Click">
+            <MenuItem Padding="0" ToolTip="Go To Memory Address (CTRL+Alt+G)" Click="GoToMemoryItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/memory-arrow.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position" Click="BreakpointItem_Click">
+            <MenuItem Padding="0" ToolTip="Create Breakpoint For Program Position (CTRL+B)" Click="BreakpointItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/control-record-plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Create Label From Program Position" Click="LabelItem_Click">
+            <MenuItem Padding="0" ToolTip="Create Label From Program Position (CTRL+L)" Click="LabelItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/tag--plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position" Click="PatchItem_Click">
+            <MenuItem Padding="0" ToolTip="Edit Instruction at Current Position (Space)" Click="PatchItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/bandaid.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Save Selected Memory Address" Click="SaveAddressItem_Click">
+            <MenuItem Padding="0" ToolTip="Save Selected Memory Address (CTRL+S)" Click="SaveAddressItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/address-book--plus.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="Trigger Disassembly from Current Position" Click="DisassemblePartialItem_Click">
+            <MenuItem Padding="0" ToolTip="Trigger Disassembly from Current Position (CTRL+D)" Click="DisassemblePartialItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/compile.png"/>
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Padding="0" ToolTip="Trigger Disassembly of Whole Program" Click="DisassembleFullItem_Click">
+            <MenuItem Padding="0" ToolTip="Trigger Disassembly of Whole Program (CTRL+Shift+D)" Click="DisassembleFullItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/compile-error.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
-            <MenuItem Padding="0" ToolTip="About" Click="AboutItem_Click">
+            <MenuItem Padding="0" ToolTip="About (F1)" Click="AboutItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/information.png"/>
                 </MenuItem.Icon>
