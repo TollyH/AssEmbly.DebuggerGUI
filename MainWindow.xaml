@@ -304,7 +304,7 @@
                     </StackPanel>
                 </TabItem>
             </TabControl>
-            <TabControl Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}">
+            <TabControl x:Name="registerTabControl" Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}" SelectionChanged="RegisterTabControl_SelectionChanged">
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
@@ -686,7 +686,7 @@
                     </TabItem.Header>
                 </TabItem>
             </TabControl>
-            <TabControl Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}">
+            <TabControl x:Name="interfaceTabControl" Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}"  SelectionChanged="InterfaceTabControl_SelectionChanged">
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">

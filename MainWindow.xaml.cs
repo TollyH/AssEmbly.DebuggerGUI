@@ -2117,13 +2117,48 @@ namespace AssEmbly.DebuggerGUI
 
         private void MemoryTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            switch (mainTabControl.SelectedIndex)
+            switch (memoryTabControl.SelectedIndex)
             {
                 case 0:  // Memory tab
                     UpdateMemoryView();
                     break;
+                case 1:  // Memory watch tab
+                    UpdateMemoryWatchListView();
+                    break;
                 case 2:  // Saved addresses tab
                     UpdateSavedAddressListView();
+                    break;
+                case 3:  // Persistent edits tab
+                    // TODO: Update
+                    break;
+            }
+        }
+
+        private void RegisterTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (registerTabControl.SelectedIndex)
+            {
+                case 0:  // Register tab
+                    UpdateRegistersView();
+                    break;
+                case 1:  // Register watch tab
+                    UpdateRegisterWatchListView();
+                    break;
+                case 2:  // Persistent edits tab
+                    // TODO: Update
+                    break;
+            }
+        }
+
+        private void InterfaceTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (interfaceTabControl.SelectedIndex)
+            {
+                case 1:  // Stack tab
+                    UpdateStackView();
+                    break;
+                case 2:  // Callstack tab
+                    UpdateCallStackView();
                     break;
             }
         }
