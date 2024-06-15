@@ -1258,7 +1258,114 @@ namespace AssEmbly.DebuggerGUI
                 }
             }
 
-            // TODO: UpdateStackBrackets();
+            UpdateStackBrackets();
+        }
+
+        private void UpdateStackBrackets()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            ulong callStackSize = DebuggingProcessor.UseV1CallStack ? 24UL : 16UL;
+            ulong stackFrameTop = DebuggingProcessor.Registers[(int)Register.rso];
+
+            ulong startAddress = stackFrameTop + ((ulong)stackScroll.Value * 8);
+            ulong endAddress = startAddress + (((ulong)stackScroll.ViewportSize - 1) * 8);
+
+            bool currentFrame = true;
+            foreach (ulong stackBase in EnumerateStackBases())
+            {
+                ulong stackFrameBottom = stackBase + callStackSize - 8;
+
+                try
+                {
+                    if (stackFrameBottom < startAddress)
+                    {
+                        continue;
+                    }
+                    if (stackFrameTop > endAddress)
+                    {
+                        break;
+                    }
+
+                    SolidColorBrush colour = currentFrame ? Brushes.LawnGreen : Brushes.LightCoral;
+
+                    double startY;
+                    bool drawStartLine;
+                    if (currentlyRenderedStackItems.TryGetValue(stackFrameTop, out int startIndex))
+                    {
+                        startY = startIndex * lineHeight + jumpArrowOffset;
+                        drawStartLine = true;
+                    }
+                    else
+                    {
+                        startY = 0;
+                        drawStartLine = false;
+                    }
+
+                    double endY;
+                    bool drawEndLine;
+                    if (currentlyRenderedStackItems.TryGetValue(stackFrameBottom, out int endIndex))
+                    {
+                        endY = endIndex * lineHeight + jumpArrowOffset;
+                        drawEndLine = true;
+                    }
+                    else
+                    {
+                        endY = stackGrid.ActualHeight;
+                        drawEndLine = false;
+                    }
+
+                    double innerX = stackBracketCanvas.ActualWidth - 2;
+                    double outerX = innerX - jumpArrowMinSize;
+
+                    if (drawStartLine)
+                    {
+                        stackBracketCanvas.Children.Add(new Line()
+                        {
+                            X1 = innerX,
+                            Y1 = startY,
+                            X2 = outerX,
+                            Y2 = startY,
+                            StrokeThickness = 3,
+                            Stroke = colour,
+                            SnapsToDevicePixels = true
+                        });
+                    }
+
+                    stackBracketCanvas.Children.Add(new Line()
+                    {
+                        X1 = outerX,
+                        Y1 = startY,
+                        X2 = outerX,
+                        Y2 = endY,
+                        StrokeThickness = 3,
+                        Stroke = colour,
+                        SnapsToDevicePixels = true
+                    });
+
+                    if (drawEndLine)
+                    {
+                        stackBracketCanvas.Children.Add(new Line()
+                        {
+                            X1 = innerX,
+                            Y1 = endY,
+                            X2 = outerX,
+                            Y2 = endY,
+                            StrokeThickness = 3,
+                            Stroke = colour,
+                            SnapsToDevicePixels = true
+                        });
+                    }
+                }
+                finally
+                {
+                    stackFrameTop = stackFrameBottom + 8;
+                    currentFrame = false;
+                }
+            }
         }
 
         public void ReloadDisassemblyView()
@@ -1431,7 +1538,7 @@ namespace AssEmbly.DebuggerGUI
 
             stackScroll.ViewportSize = lineCount;
 
-            UpdateDisassemblyView();
+            UpdateStackView();
         }
 
         public void UpdateRunningState(RunningState state)
