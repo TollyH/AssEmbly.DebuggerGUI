@@ -1126,10 +1126,7 @@ namespace AssEmbly.DebuggerGUI
                 });
             }
 
-            for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
-                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - callStackSize;
-                // callStackSize - 16 has no effect (i.e. is 0) when not using V1 call stack compat
-                stackBase = DebuggingProcessor!.ReadMemoryQWord(stackBase + callStackSize - 16))
+            foreach (ulong stackBase in EnumerateStackBases())
             {
                 ulong returnAddress = DebuggingProcessor.ReadMemoryQWord(stackBase + callStackSize - 8);
 
@@ -1180,14 +1177,7 @@ namespace AssEmbly.DebuggerGUI
                 ((ulong)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rso]) / 8d);
 
             // Get the base of every stack frame on the call-stack
-            HashSet<ulong> stackBases = new();
-            for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
-                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - callStackSize;
-                // callStackSize - 16 has no effect (i.e. is 0) when not using V1 call stack compat
-                stackBase = DebuggingProcessor.ReadMemoryQWord(stackBase + callStackSize - 16))
-            {
-                stackBases.Add(stackBase);
-            }
+            HashSet<ulong> stackBases = EnumerateStackBases().ToHashSet();
 
             ulong startAddress = DebuggingProcessor.Registers[(int)Register.rso] + ((ulong)stackScroll.Value * 8);
             for (int i = 0; i < stackValuePanel.Children.Count; i++)
@@ -1840,6 +1830,24 @@ namespace AssEmbly.DebuggerGUI
             }
 
             return popup.InputText;
+        }
+
+        private IEnumerable<ulong> EnumerateStackBases()
+        {
+            if (DebuggingProcessor is null)
+            {
+                yield break;
+            }
+
+            ulong callStackSize = DebuggingProcessor.UseV1CallStack ? 24UL : 16UL;
+
+            for (ulong stackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                stackBase <= (ulong)DebuggingProcessor!.Memory.Length - callStackSize;
+                // callStackSize - 16 has no effect (i.e. is 0) when not using V1 call stack compat
+                stackBase = DebuggingProcessor.ReadMemoryQWord(stackBase + callStackSize - 16))
+            {
+                yield return stackBase;
+            }
         }
 
         private void AboutItem_Click(object sender, RoutedEventArgs e)
