@@ -9,6 +9,50 @@
     <ContextMenu.Resources>
         <Style TargetType="local:MemoryContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>
+    <MenuItem Header="Edit 8-bit Value" Click="Edit8Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-008--pencil.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Edit 8-bit Value (Persistent)" Click="EditPersistent8Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-008--lock.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
+    <MenuItem Header="Edit 16-bit Value" Click="Edit16Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-016--pencil.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Edit 16-bit Value (Persistent)" Click="EditPersistent16Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-016--lock.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
+    <MenuItem Header="Edit 32-bit Value" Click="Edit32Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-032--pencil.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Edit 32-bit Value (Persistent)" Click="EditPersistent32Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-032--lock.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
+    <MenuItem Header="Edit 64-bit Value" Click="Edit64Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-064--pencil.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Edit 64-bit Value (Persistent)" Click="EditPersistent64Item_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/processor-bit-064--lock.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Add New Label" Click="LabelItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/tag--plus.png"/>

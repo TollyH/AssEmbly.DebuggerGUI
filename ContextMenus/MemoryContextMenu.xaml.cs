@@ -23,6 +23,14 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? Change16WatchAdded;
         public event EventDelegate? Change32WatchAdded;
         public event EventDelegate? Change64WatchAdded;
+        public event EventDelegate? Edited8;
+        public event EventDelegate? PersistentEdited8;
+        public event EventDelegate? Edited16;
+        public event EventDelegate? PersistentEdited16;
+        public event EventDelegate? Edited32;
+        public event EventDelegate? PersistentEdited32;
+        public event EventDelegate? Edited64;
+        public event EventDelegate? PersistentEdited64;
 
         public MemoryContextMenu()
         {
@@ -92,6 +100,46 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void WatchChange64Item_Click(object sender, RoutedEventArgs e)
         {
             Change64WatchAdded?.Invoke(this);
+        }
+
+        private void Edit8Item_Click(object sender, RoutedEventArgs e)
+        {
+            Edited8?.Invoke(this);
+        }
+
+        private void EditPersistent8Item_Click(object sender, RoutedEventArgs e)
+        {
+            PersistentEdited8?.Invoke(this);
+        }
+
+        private void Edit16Item_Click(object sender, RoutedEventArgs e)
+        {
+            Edited16?.Invoke(this);
+        }
+
+        private void EditPersistent16Item_Click(object sender, RoutedEventArgs e)
+        {
+            PersistentEdited16?.Invoke(this);
+        }
+
+        private void Edit32Item_Click(object sender, RoutedEventArgs e)
+        {
+            Edited32?.Invoke(this);
+        }
+
+        private void EditPersistent32Item_Click(object sender, RoutedEventArgs e)
+        {
+            PersistentEdited32?.Invoke(this);
+        }
+
+        private void Edit64Item_Click(object sender, RoutedEventArgs e)
+        {
+            Edited64?.Invoke(this);
+        }
+
+        private void EditPersistent64Item_Click(object sender, RoutedEventArgs e)
+        {
+            PersistentEdited64?.Invoke(this);
         }
     }
 }

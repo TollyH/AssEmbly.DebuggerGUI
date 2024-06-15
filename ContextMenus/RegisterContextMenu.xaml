@@ -9,6 +9,17 @@
     <ContextMenu.Resources>
         <Style TargetType="local:RegisterContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Resources>
+    <MenuItem Header="Edit Value" Click="EditItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/drawer--pencil.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="Edit Value (Persistent)" Click="EditPersistentItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/drawer--lock.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+    <Separator/>
     <MenuItem Header="Add New Label" Click="LabelItem_Click">
         <MenuItem.Icon>
             <Image Source="pack://application:,,,/Icons/tag--plus.png"/>

@@ -39,6 +39,8 @@ namespace AssEmbly.DebuggerGUI
         private readonly HashSet<IBreakpoint> breakpoints = new();
         private readonly Dictionary<string, ulong> labels = new();
         private readonly Dictionary<ulong, string> savedAddresses = new();
+        private readonly Dictionary<Register, ulong> persistentRegisterEdits = new();
+        private readonly Dictionary<ulong, byte> persistentMemoryEdits = new();
 
         private string? lastOpenedPath;
 
@@ -392,6 +394,8 @@ namespace AssEmbly.DebuggerGUI
             UpdateMemoryWatchListView();
             UpdateCallStackView();
             UpdateStackView();
+            UpdateMemoryEditListView();
+            UpdateRegisterEditListView();
         }
 
         public void UpdateRegistersView()
@@ -430,7 +434,11 @@ namespace AssEmbly.DebuggerGUI
                     blockExtra.Text = value.ToString();
                 }
 
-                SolidColorBrush textColour = oldText == newText ? Brushes.White : Brushes.LightCoral;
+                SolidColorBrush textColour = persistentRegisterEdits.ContainsKey(register)
+                    ? Brushes.Gold
+                    : oldText != newText
+                        ? Brushes.LightCoral
+                        : Brushes.White;
                 block.Foreground = textColour;
                 blockExtra.Foreground = textColour;
 
@@ -705,6 +713,34 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
+        public void UpdateRegisterEditListView()
+        {
+            registerEditListRegisters.Children.Clear();
+            registerEditListValues.Children.Clear();
+            foreach ((Register register, ulong value) in persistentRegisterEdits)
+            {
+                ContextMenus.RegisterPersistentEditContextMenu contextMenu = new(register);
+                contextMenu.EditRemoved += RegisterContextMenu_EditRemoved;
+
+                registerEditListRegisters.Children.Add(new TextBlock()
+                {
+                    Text = register.ToString(),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                registerEditListValues.Children.Add(new TextBlock()
+                {
+                    Text = value.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
         public void UpdateMemoryWatchListView()
         {
             memoryWatchListAddresses.Children.Clear();
@@ -747,6 +783,34 @@ namespace AssEmbly.DebuggerGUI
                     Text = breakpoint is MemoryValueBreakpoint valueBreakpoint
                         ? valueBreakpoint.TargetValue.ToString("X16")
                         : "-",
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+            }
+        }
+
+        public void UpdateMemoryEditListView()
+        {
+            memoryEditListAddresses.Children.Clear();
+            memoryEditListValues.Children.Clear();
+            foreach ((ulong address, byte value) in persistentMemoryEdits)
+            {
+                ContextMenus.MemoryPersistentEditContextMenu contextMenu = new(address);
+                contextMenu.EditRemoved += ContextMenu_EditRemoved;
+
+                memoryEditListAddresses.Children.Add(new TextBlock()
+                {
+                    Text = address.ToString("X16"),
+                    Foreground = Brushes.White,
+                    FontFamily = codeFont,
+                    Margin = new Thickness(5, 1, 5, 0),
+                    ContextMenu = contextMenu
+                });
+                memoryEditListValues.Children.Add(new TextBlock()
+                {
+                    Text = value.ToString("X2"),
                     Foreground = Brushes.White,
                     FontFamily = codeFont,
                     Margin = new Thickness(5, 1, 5, 0),
@@ -969,15 +1033,17 @@ namespace AssEmbly.DebuggerGUI
                         }
 
                         string dataText = data.ToString("X2");
-                        SolidColorBrush foreground = sameAddress && dataText != dataBlock.Text
-                            ? Brushes.LightCoral  // Data changed
-                            : watchedAddresses.Contains((ulong)address)
-                                ? Brushes.Turquoise  // Data watched
+                        SolidColorBrush foreground = persistentMemoryEdits.ContainsKey((ulong)address)
+                            ? Brushes.Gold  // Address is persistently edited
+                            : sameAddress && dataText != dataBlock.Text
+                                ? Brushes.LightCoral  // Data changed
                                 : anyRegistersPoint
                                     ? Brushes.LawnGreen  // Data pointed to by register
                                     : savedAddresses.ContainsKey((ulong)address)
-                                        ? Brushes.Gold  // Address is saved
-                                        : Brushes.White;
+                                        ? Brushes.MediumPurple  // Address is saved
+                                        : watchedAddresses.Contains((ulong)address)
+                                            ? Brushes.Turquoise  // Data watched
+                                            : Brushes.White;
 
                         dataBlock.Visibility = Visibility.Visible;
                         dataBlock.Text = dataText;
@@ -1481,6 +1547,14 @@ namespace AssEmbly.DebuggerGUI
                     contextMenu.Change16WatchAdded += MemoryContextMenu_Change16WatchAdded;
                     contextMenu.Change32WatchAdded += MemoryContextMenu_Change32WatchAdded;
                     contextMenu.Change64WatchAdded += MemoryContextMenu_Change64WatchAdded;
+                    contextMenu.Edited8 += MemoryContextMenu_Edited8;
+                    contextMenu.PersistentEdited8 += MemoryContextMenu_PersistentEdited8;
+                    contextMenu.Edited16 += MemoryContextMenu_Edited16;
+                    contextMenu.PersistentEdited16 += MemoryContextMenu_PersistentEdited16;
+                    contextMenu.Edited32 += MemoryContextMenu_Edited32;
+                    contextMenu.PersistentEdited32 += MemoryContextMenu_PersistentEdited32;
+                    contextMenu.Edited64 += MemoryContextMenu_Edited64;
+                    contextMenu.PersistentEdited64 += MemoryContextMenu_PersistentEdited64;
 
                     TextBlock dataBlock = new()
                     {
@@ -1803,6 +1877,23 @@ namespace AssEmbly.DebuggerGUI
             programJumpArrowCanvas.Children.Add(registerNameLabel);
         }
 
+        private void ApplyPersistentEdits()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            foreach ((Register register, ulong value) in persistentRegisterEdits)
+            {
+                DebuggingProcessor.Registers[(int)register] = value;
+            }
+            foreach ((ulong address, byte value) in persistentMemoryEdits)
+            {
+                DebuggingProcessor.Memory[address] = value;
+            }
+        }
+
         private void OnBreak(BackgroundRunner sender, bool halt)
         {
             if (DebuggingProcessor is null || !ReferenceEquals(processorRunner, sender))
@@ -1825,6 +1916,16 @@ namespace AssEmbly.DebuggerGUI
             {
                 UnloadExecutable();
             }
+        }
+
+        private void OnInstructionExecution(BackgroundRunner sender)
+        {
+            if (DebuggingProcessor is null || !ReferenceEquals(processorRunner, sender))
+            {
+                return;
+            }
+
+            ApplyPersistentEdits();
         }
 
         private void OnException(BackgroundRunner sender, Exception exception)
@@ -2013,7 +2114,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteSingleInstruction(OnBreak, OnException, cancellationTokenSource.Token))
+            if (processorRunner.ExecuteSingleInstruction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
@@ -2070,7 +2171,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, breakpoints, cancellationTokenSource.Token))
+            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, OnInstructionExecution, breakpoints, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
@@ -2140,7 +2241,7 @@ namespace AssEmbly.DebuggerGUI
                     UpdateSavedAddressListView();
                     break;
                 case 3:  // Persistent edits tab
-                    // TODO: Update
+                    UpdateMemoryEditListView();
                     break;
             }
         }
@@ -2156,7 +2257,7 @@ namespace AssEmbly.DebuggerGUI
                     UpdateRegisterWatchListView();
                     break;
                 case 2:  // Persistent edits tab
-                    // TODO: Update
+                    UpdateRegisterEditListView();
                     break;
             }
         }
@@ -2293,7 +2394,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteOverFunction(OnBreak, OnException, cancellationTokenSource.Token))
+            if (processorRunner.ExecuteOverFunction(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
@@ -2305,7 +2406,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteUntilReturn(OnBreak, OnException, cancellationTokenSource.Token))
+            if (processorRunner.ExecuteUntilReturn(OnBreak, OnException, OnInstructionExecution, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
@@ -2574,6 +2675,39 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
+        private void RegisterContextMenu_Edited(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new value of the register", "Register Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.Registers[(int)sender.RepresentedRegister] = (ulong)value;
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_PersistentEdited(ContextMenus.RegisterContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new persistent value of the register", "Register Persistent Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.Registers[(int)sender.RepresentedRegister] = (ulong)value;
+                persistentRegisterEdits[sender.RepresentedRegister] = (ulong)value;
+            }
+
+            UpdateAllInformation();
+        }
+
         private void RegisterContextMenu_ChangeWatchAdded(ContextMenus.RegisterContextMenu sender)
         {
             if (DebuggingProcessor is null)
@@ -2751,6 +2885,197 @@ namespace AssEmbly.DebuggerGUI
             UpdateAllInformation();
         }
 
+        private void MemoryContextMenu_Edited8(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("An 8-bit value cannot be edited here. At least 1 byte of memory is required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new 8-bit value", "Memory Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.Memory[sender.Address] = (byte)value;
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_PersistentEdited8(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("An 8-bit value cannot be edited here. At least 1 byte of memory is required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new persistent 8-bit value", "Memory Persistent Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.Memory[sender.Address] = (byte)value;
+                persistentMemoryEdits[sender.Address] = (byte)value;
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Edited16(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 16-bit value cannot be edited here. At least 2 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new 16-bit value", "Memory Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryWord(sender.Address, (ushort)value);
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_PersistentEdited16(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 16-bit value cannot be edited here. At least 2 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new persistent 16-bit value", "Memory Persistent Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryWord(sender.Address, (ushort)value);
+                persistentMemoryEdits[sender.Address] = (byte)value;
+                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Edited32(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 32-bit value cannot be edited here. At least 4 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new 32-bit value", "Memory Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryDWord(sender.Address, (uint)value);
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_PersistentEdited32(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 32-bit value cannot be edited here. At least 4 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new persistent 32-bit value", "Memory Persistent Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryDWord(sender.Address, (uint)value);
+                persistentMemoryEdits[sender.Address] = (byte)value;
+                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+                persistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
+                persistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_Edited64(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 64-bit value cannot be edited here. At least 8 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new 64-bit value", "Memory Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryQWord(sender.Address, (ulong)value);
+            }
+
+            UpdateAllInformation();
+        }
+
+        private void MemoryContextMenu_PersistentEdited64(ContextMenus.IAddressContextMenu sender)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            if (sender.Address > (ulong)DebuggingProcessor.Memory.Length - 1)
+            {
+                ShowErrorDialog("A 64-bit value cannot be edited here. At least 8 bytes of memory are required.", "Memory Edit Failed");
+                return;
+            }
+
+            long? value = PromptNumberInput("Enter the new persistent 64-bit value", "Memory Persistent Edit");
+            if (value is not null)
+            {
+                DebuggingProcessor.WriteMemoryQWord(sender.Address, (ulong)value);
+                persistentMemoryEdits[sender.Address] = (byte)value;
+                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+                persistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
+                persistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
+                persistentMemoryEdits[sender.Address + 4] = (byte)(value >> 32);
+                persistentMemoryEdits[sender.Address + 5] = (byte)(value >> 40);
+                persistentMemoryEdits[sender.Address + 6] = (byte)(value >> 48);
+                persistentMemoryEdits[sender.Address + 7] = (byte)(value >> 56);
+            }
+
+            UpdateAllInformation();
+        }
+
         private void StackGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             ReloadStackView();
@@ -2770,6 +3095,18 @@ namespace AssEmbly.DebuggerGUI
         private void stackBracketCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateStackView();
+        }
+
+        private void ContextMenu_EditRemoved(ContextMenus.IAddressContextMenu sender)
+        {
+            _ = persistentMemoryEdits.Remove(sender.Address);
+            UpdateAllInformation();
+        }
+
+        private void RegisterContextMenu_EditRemoved(ContextMenus.RegisterPersistentEditContextMenu sender)
+        {
+            _ = persistentRegisterEdits.Remove(sender.RepresentedRegister);
+            UpdateAllInformation();
         }
     }
 }

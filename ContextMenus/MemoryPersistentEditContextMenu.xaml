@@ -1,0 +1,17 @@
+﻿<ContextMenu x:Class="AssEmbly.DebuggerGUI.ContextMenus.MemoryPersistentEditContextMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
+             mc:Ignorable="d"
+             FontFamily="Segoe UI" Foreground="White">
+    <ContextMenu.Resources>
+        <Style TargetType="local:MemoryPersistentEditContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
+    </ContextMenu.Resources>
+    <MenuItem x:Name="removeItem" Header="Remove Memory Edit" Click="RemoveItem_Click">
+        <MenuItem.Icon>
+            <Image Source="pack://application:,,,/Icons/pencil--minus.png"/>
+        </MenuItem.Icon>
+    </MenuItem>
+</ContextMenu>

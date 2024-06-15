@@ -25,6 +25,8 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         public event EventDelegate? MemoryScrolled;
         public event EventDelegate? ValueWatchAdded;
         public event EventDelegate? ChangeWatchAdded;
+        public event EventDelegate? Edited;
+        public event EventDelegate? PersistentEdited;
 
         public RegisterContextMenu()
         {
@@ -62,6 +64,16 @@ namespace AssEmbly.DebuggerGUI.ContextMenus
         private void WatchChangeItem_Click(object sender, RoutedEventArgs e)
         {
             ChangeWatchAdded?.Invoke(this);
+        }
+
+        private void EditItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edited?.Invoke(this);
+        }
+
+        private void EditPersistentItem_Click(object sender, RoutedEventArgs e)
+        {
+            PersistentEdited?.Invoke(this);
         }
     }
 }
