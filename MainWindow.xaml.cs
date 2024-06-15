@@ -1582,7 +1582,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            string? name = AskString("Enter the name of the new label", "New Label");
+            string? name = PromptStringInput("Enter the name of the new label", "New Label");
             if (name is null)
             {
                 return;
@@ -1601,64 +1601,13 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            string? name = AskString("Enter a description for the saved address (optional)", "Save Address");
+            string? name = PromptStringInput("Enter a description for the saved address (optional)", "Save Address");
             if (name is null)
             {
                 return;
             }
 
             savedAddresses[address] = name;
-        }
-
-        private void PromptInstructionPatch(ulong address, bool continuous)
-        {
-            if (DebuggingProcessor is null)
-            {
-                return;
-            }
-
-            while (continuous && address < (ulong)DebuggingProcessor.Memory.Length)
-            {
-                string currentLine;
-                ulong instructionSize;
-                if (disassembledLines.TryGetValue(address, out (string Line, List<ulong> References) line))
-                {
-                    currentLine = line.Line;
-                    instructionSize = (ulong)disassembledAddresses.First(a => a.Start == (long)address).Length;
-                }
-                else
-                {
-                    (currentLine, instructionSize, _, _) = Disassembler.DisassembleInstruction(
-                        DebuggingProcessor.Memory.AsSpan((int)address), disassemblerOptions, false);
-                }
-
-                int proceedingNops = 0;
-                while ((int)(address + instructionSize) + proceedingNops < DebuggingProcessor.Memory.Length
-                    && DebuggingProcessor.Memory[(int)(address + instructionSize) + proceedingNops] == 0x01)
-                {
-                    proceedingNops++;
-                }
-
-                PatchDialog dialog = new(currentLine, address, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
-                {
-                    Owner = this
-                };
-                if (!(dialog.ShowDialog() ?? false) || dialog.AssemblyResult == PatchDialog.ResultType.Fail)
-                {
-                    return;
-                }
-
-                dialog.AssembledBytes.CopyTo(DebuggingProcessor.Memory, (long)address);
-                for (int i = dialog.AssembledBytes.Length; i < (int)instructionSize; i++)
-                {
-                    DebuggingProcessor.Memory[(int)address + i] = 0x01; // NOP
-                }
-
-                DisassembleFromProgramOffset(address, true);
-                UpdateAllInformation();
-
-                address += (ulong)dialog.AssembledBytes.Length;
-            }
         }
 
         private void DrawJumpArrow(ulong startAddress, ulong targetAddress, JumpArrowStyle style, int indentationIndex)
@@ -1914,7 +1863,18 @@ namespace AssEmbly.DebuggerGUI
 
             try
             {
-                _ = Assembler.ParseLiteral(popup.InputText, false, out ulong parsedNumber);
+                string text = Assembler.CleanLine(popup.InputText);
+                if (text.StartsWith('\''))
+                {
+                    int index = 0;
+                    int endIndex = text.Length - 1;
+                    text = Assembler.PreParseStringLiteral(text, ref index);
+                    if (index != endIndex)
+                    {
+                        throw new Exception("There cannot be any characters after a character literal.");
+                    }
+                }
+                _ = Assembler.ParseLiteral(text, false, out ulong parsedNumber);
                 return (long)parsedNumber;
             }
             catch (Exception exception)
@@ -1924,7 +1884,7 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        private string? AskString(string message, string title)
+        private string? PromptStringInput(string message, string title)
         {
             DialogPopup popup = new(message, title, DialogPopup.QuestionIcon, true)
             {
@@ -1937,6 +1897,57 @@ namespace AssEmbly.DebuggerGUI
             }
 
             return popup.InputText;
+        }
+
+        private void PromptInstructionPatch(ulong address, bool continuous)
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            while (continuous && address < (ulong)DebuggingProcessor.Memory.Length)
+            {
+                string currentLine;
+                ulong instructionSize;
+                if (disassembledLines.TryGetValue(address, out (string Line, List<ulong> References) line))
+                {
+                    currentLine = line.Line;
+                    instructionSize = (ulong)disassembledAddresses.First(a => a.Start == (long)address).Length;
+                }
+                else
+                {
+                    (currentLine, instructionSize, _, _) = Disassembler.DisassembleInstruction(
+                        DebuggingProcessor.Memory.AsSpan((int)address), disassemblerOptions, false);
+                }
+
+                int proceedingNops = 0;
+                while ((int)(address + instructionSize) + proceedingNops < DebuggingProcessor.Memory.Length
+                    && DebuggingProcessor.Memory[(int)(address + instructionSize) + proceedingNops] == 0x01)
+                {
+                    proceedingNops++;
+                }
+
+                PatchDialog dialog = new(currentLine, address, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
+                {
+                    Owner = this
+                };
+                if (!(dialog.ShowDialog() ?? false) || dialog.AssemblyResult == PatchDialog.ResultType.Fail)
+                {
+                    return;
+                }
+
+                dialog.AssembledBytes.CopyTo(DebuggingProcessor.Memory, (long)address);
+                for (int i = dialog.AssembledBytes.Length; i < (int)instructionSize; i++)
+                {
+                    DebuggingProcessor.Memory[(int)address + i] = 0x01; // NOP
+                }
+
+                DisassembleFromProgramOffset(address, true);
+                UpdateAllInformation();
+
+                address += (ulong)dialog.AssembledBytes.Length;
+            }
         }
 
         private IEnumerable<ulong> EnumerateStackBases()
