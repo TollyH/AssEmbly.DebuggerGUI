@@ -36,11 +36,7 @@ namespace AssEmbly.DebuggerGUI
 
         public ulong SelectedMemoryAddress { get; private set; } = 0;
 
-        private readonly HashSet<IBreakpoint> breakpoints = new();
-        private readonly Dictionary<string, ulong> labels = new();
-        private readonly Dictionary<ulong, string> savedAddresses = new();
-        private readonly Dictionary<Register, ulong> persistentRegisterEdits = new();
-        private readonly Dictionary<ulong, byte> persistentMemoryEdits = new();
+        private ProgramStateSave programState = new("AssEmbly-DebuggerGUI-Default");
 
         private string? lastOpenedPath;
 
@@ -145,7 +141,7 @@ namespace AssEmbly.DebuggerGUI
 
             Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
 
-            LoadExecutable(executable.Program, executable.EntryPoint);
+            LoadExecutable(System.IO.Path.GetFileName(path), executable.Program, executable.EntryPoint);
 
             lastOpenedPath = path;
             executablePathText.Text = path;
@@ -170,13 +166,13 @@ namespace AssEmbly.DebuggerGUI
 
             Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
 
-            LoadExecutable(executable, 0);
+            LoadExecutable(System.IO.Path.GetFileName(path), executable, 0);
 
             lastOpenedPath = path;
             executablePathText.Text = path;
         }
 
-        public void LoadExecutable(byte[] program, ulong entryPoint)
+        public void LoadExecutable(string programName, byte[] program, ulong entryPoint)
         {
             if (!ulong.TryParse(memorySizeInput.Text, out ulong memorySize))
             {
@@ -192,7 +188,11 @@ namespace AssEmbly.DebuggerGUI
                     forceV1.IsChecked ?? false, mapStack.IsChecked ?? true, autoEcho.IsChecked ?? false);
                 DebuggingProcessor.LoadProgram(program);
                 processorRunner = new BackgroundRunner(DebuggingProcessor, Dispatcher, consoleOutput, consoleInput);
-                labels["ENTRY"] = entryPoint;
+                programState = ProgramStateSave.LoadOrCreateNew(programName, out bool loadedExisting);
+                if (!loadedExisting)
+                {
+                    programState.Labels["ENTRY"] = entryPoint;
+                }
                 UpdateRunningState(RunningState.Paused);
             }
             catch (Exception exc)
@@ -228,7 +228,7 @@ namespace AssEmbly.DebuggerGUI
                 {
                     foreach (string name in names)
                     {
-                        labels[name] = address;
+                        programState.Labels[name] = address;
                     }
                 }
 
@@ -389,7 +389,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, OnInstructionExecution, breakpoints, cancellationTokenSource.Token))
+            if (processorRunner.ExecuteUntilBreak(OnBreak, OnException, OnInstructionExecution, programState.Breakpoints, cancellationTokenSource.Token))
             {
                 UpdateRunningState(RunningState.Running);
             }
@@ -431,20 +431,35 @@ namespace AssEmbly.DebuggerGUI
             }
         }
 
-        public void UnloadExecutable()
+        public void UnloadExecutable(bool save = true)
         {
             DebuggingProcessor = null;
             processorRunner = null;
 
             BreakExecution();
-            breakpoints.Clear();
-            labels.Clear();
-            savedAddresses.Clear();
+
+            if (save)
+            {
+                programState.Save();
+            }
+            programState = new("AssEmbly-DebuggerGUI-Default");
 
             SelectedMemoryAddress = 0;
 
             UpdateRunningState(RunningState.Stopped);
             executablePathText.Text = "No executable loaded";
+        }
+
+        public void DeleteProgramSaveState()
+        {
+            if (DebuggingProcessor is null)
+            {
+                return;
+            }
+
+            programState.Delete();
+            UnloadExecutable(false);
+            ReloadLastExecutable();
         }
 
         public void UpdateAllInformation()
@@ -501,7 +516,7 @@ namespace AssEmbly.DebuggerGUI
                     blockExtra.Text = value.ToString();
                 }
 
-                SolidColorBrush textColour = persistentRegisterEdits.ContainsKey(register)
+                SolidColorBrush textColour = programState.PersistentRegisterEdits.ContainsKey(register)
                     ? Brushes.Gold
                     : oldText != newText
                         ? Brushes.LightCoral
@@ -572,7 +587,7 @@ namespace AssEmbly.DebuggerGUI
                     BreakpointButton breakpointButton = (BreakpointButton)programBreakpointsPanel.Children[i];
                     breakpointButton.Visibility = Visibility.Visible;
                     breakpointButton.Address = (ulong)addressRange.Start;
-                    breakpointButton.IsChecked = breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
+                    breakpointButton.IsChecked = programState.Breakpoints.Contains(new RegisterValueBreakpoint(Register.rpo, (ulong)addressRange.Start));
                     ((ContextMenus.ProgramContextMenu)breakpointButton.ContextMenu!).Address = (ulong)addressRange.Start;
 
                     TextBlock lineBlock = (TextBlock)programLinesPanel.Children[i];
@@ -586,7 +601,7 @@ namespace AssEmbly.DebuggerGUI
                     TextBlock labelsBlock = (TextBlock)programLabelsPanel.Children[i];
                     labelsBlock.Visibility = Visibility.Visible;
                     labelsBlock.Text = "";
-                    foreach ((string name, _) in labels.Where(l => l.Value == (ulong)addressRange.Start))
+                    foreach ((string name, _) in programState.Labels.Where(l => l.Value == (ulong)addressRange.Start))
                     {
                         labelsBlock.Text += $":{name} ";
                     }
@@ -599,7 +614,7 @@ namespace AssEmbly.DebuggerGUI
                     string line = disassembledLines[(ulong)addressRange.Start].Line;
                     foreach (ulong referencedAddress in disassembledLines[(ulong)addressRange.Start].References)
                     {
-                        foreach (string label in labels.Where(kv => kv.Value == referencedAddress).Select(kv => kv.Key))
+                        foreach (string label in programState.Labels.Where(kv => kv.Value == referencedAddress).Select(kv => kv.Key))
                         {
                             line += $"  ; 0x{referencedAddress:X} -> :{label}";
                         }
@@ -710,7 +725,7 @@ namespace AssEmbly.DebuggerGUI
         {
             breakpointListAddresses.Children.Clear();
             breakpointListSourceLines.Children.Clear();
-            foreach (RegisterValueBreakpoint breakpoint in breakpoints.OfType<RegisterValueBreakpoint>().OrderBy(b => b.TargetValue))
+            foreach (RegisterValueBreakpoint breakpoint in programState.Breakpoints.OfType<RegisterValueBreakpoint>().OrderBy(b => b.TargetValue))
             {
                 ContextMenus.BreakpointListContextMenu contextMenu = new(breakpoint);
                 contextMenu.BreakpointRemoved += ContextMenu_BreakpointRemoved;
@@ -744,7 +759,7 @@ namespace AssEmbly.DebuggerGUI
             registerWatchListRegisters.Children.Clear();
             registerWatchListTypes.Children.Clear();
             registerWatchListValues.Children.Clear();
-            foreach (IRegisterBreakpoint breakpoint in breakpoints.OfType<IRegisterBreakpoint>().OrderBy(b => b.CheckRegister))
+            foreach (IRegisterBreakpoint breakpoint in programState.Breakpoints.OfType<IRegisterBreakpoint>().OrderBy(b => b.CheckRegister))
             {
                 ContextMenus.WatchContextMenu contextMenu = new(breakpoint);
                 contextMenu.WatchRemoved += ContextMenu_WatchRemoved;
@@ -784,7 +799,7 @@ namespace AssEmbly.DebuggerGUI
         {
             registerEditListRegisters.Children.Clear();
             registerEditListValues.Children.Clear();
-            foreach ((Register register, ulong value) in persistentRegisterEdits)
+            foreach ((Register register, ulong value) in programState.PersistentRegisterEdits)
             {
                 ContextMenus.RegisterPersistentEditContextMenu contextMenu = new(register);
                 contextMenu.EditRemoved += RegisterContextMenu_EditRemoved;
@@ -814,7 +829,7 @@ namespace AssEmbly.DebuggerGUI
             memoryWatchListSizes.Children.Clear();
             memoryWatchListTypes.Children.Clear();
             memoryWatchListValues.Children.Clear();
-            foreach (IMemoryBreakpoint breakpoint in breakpoints.OfType<IMemoryBreakpoint>().OrderBy(b => b.CheckAddress))
+            foreach (IMemoryBreakpoint breakpoint in programState.Breakpoints.OfType<IMemoryBreakpoint>().OrderBy(b => b.CheckAddress))
             {
                 ContextMenus.WatchContextMenu contextMenu = new(breakpoint);
                 contextMenu.WatchRemoved += ContextMenu_WatchRemoved;
@@ -862,7 +877,7 @@ namespace AssEmbly.DebuggerGUI
         {
             memoryEditListAddresses.Children.Clear();
             memoryEditListValues.Children.Clear();
-            foreach ((ulong address, byte value) in persistentMemoryEdits)
+            foreach ((ulong address, byte value) in programState.PersistentMemoryEdits)
             {
                 ContextMenus.MemoryPersistentEditContextMenu contextMenu = new(address);
                 contextMenu.EditRemoved += ContextMenu_EditRemoved;
@@ -890,7 +905,7 @@ namespace AssEmbly.DebuggerGUI
         {
             labelsListNames.Children.Clear();
             labelsListAddresses.Children.Clear();
-            foreach ((string name, ulong address) in labels.OrderBy(l => l.Value))
+            foreach ((string name, ulong address) in programState.Labels.OrderBy(l => l.Value))
             {
                 ContextMenus.LabelListContextMenu contextMenu = new(name, address);
                 contextMenu.LabelRemoved += ContextMenu_LabelRemoved;
@@ -924,7 +939,7 @@ namespace AssEmbly.DebuggerGUI
         {
             savedAddressListAddresses.Children.Clear();
             savedAddressListDescriptions.Children.Clear();
-            foreach ((ulong address, string description) in savedAddresses.OrderBy(l => l.Key))
+            foreach ((ulong address, string description) in programState.SavedAddresses.OrderBy(l => l.Key))
             {
                 ContextMenus.SavedAddressListContextMenu contextMenu = new(address);
                 contextMenu.AddressRemoved += ContextMenu_AddressRemoved;
@@ -1019,7 +1034,7 @@ namespace AssEmbly.DebuggerGUI
             }
 
             HashSet<ulong> watchedAddresses = new();
-            foreach (IMemoryBreakpoint breakpoint in breakpoints.OfType<IMemoryBreakpoint>())
+            foreach (IMemoryBreakpoint breakpoint in programState.Breakpoints.OfType<IMemoryBreakpoint>())
             {
                 ulong byteCount = breakpoint.CheckSize switch
                 {
@@ -1100,13 +1115,13 @@ namespace AssEmbly.DebuggerGUI
                         }
 
                         string dataText = data.ToString("X2");
-                        SolidColorBrush foreground = persistentMemoryEdits.ContainsKey((ulong)address)
+                        SolidColorBrush foreground = programState.PersistentMemoryEdits.ContainsKey((ulong)address)
                             ? Brushes.Gold  // Address is persistently edited
                             : sameAddress && dataText != dataBlock.Text
                                 ? Brushes.LightCoral  // Data changed
                                 : anyRegistersPoint
                                     ? Brushes.LawnGreen  // Data pointed to by register
-                                    : savedAddresses.ContainsKey((ulong)address)
+                                    : programState.SavedAddresses.ContainsKey((ulong)address)
                                         ? Brushes.Violet  // Address is saved
                                         : watchedAddresses.Contains((ulong)address)
                                             ? Brushes.Turquoise  // Data watched
@@ -1246,7 +1261,7 @@ namespace AssEmbly.DebuggerGUI
             });
 
             ulong currentAddress = DebuggingProcessor.Registers[(int)Register.rpo];
-            List<KeyValuePair<string, ulong>> currentLabels = labels.Where(kv => kv.Value <= currentAddress).ToList();
+            List<KeyValuePair<string, ulong>> currentLabels = programState.Labels.Where(kv => kv.Value <= currentAddress).ToList();
             if (currentLabels.Count >= 1)
             {
                 KeyValuePair<string, ulong> closestPriorLabel = currentLabels.MaxBy(kv => kv.Value);
@@ -1278,7 +1293,7 @@ namespace AssEmbly.DebuggerGUI
                     ContextMenu = contextMenu
                 });
 
-                List<KeyValuePair<string, ulong>> priorLabels = labels.Where(kv => kv.Value <= returnAddress).ToList();
+                List<KeyValuePair<string, ulong>> priorLabels = programState.Labels.Where(kv => kv.Value <= returnAddress).ToList();
                 if (priorLabels.Count >= 1)
                 {
                     KeyValuePair<string, ulong> closestPriorLabel = priorLabels.MaxBy(kv => kv.Value);
@@ -1732,7 +1747,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            if (!labels.TryAdd(name, address))
+            if (!programState.Labels.TryAdd(name, address))
             {
                 ShowErrorDialog($"A label with the name \"{name}\" already exists", "Label Creation Failed");
             }
@@ -1751,7 +1766,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            savedAddresses[address] = name;
+            programState.SavedAddresses[address] = name;
         }
 
         private void DrawJumpArrow(ulong startAddress, ulong targetAddress, JumpArrowStyle style, int indentationIndex)
@@ -1953,7 +1968,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
+            _ = programState.Breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, DebuggingProcessor.Registers[(int)Register.rpo]));
             UpdateAllInformation();
         }
 
@@ -1964,11 +1979,11 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            foreach ((Register register, ulong value) in persistentRegisterEdits)
+            foreach ((Register register, ulong value) in programState.PersistentRegisterEdits)
             {
                 DebuggingProcessor.Registers[(int)register] = value;
             }
-            foreach ((ulong address, byte value) in persistentMemoryEdits)
+            foreach ((ulong address, byte value) in programState.PersistentMemoryEdits)
             {
                 DebuggingProcessor.Memory[address] = value;
             }
@@ -2109,7 +2124,7 @@ namespace AssEmbly.DebuggerGUI
                     proceedingNops++;
                 }
 
-                PatchDialog dialog = new(currentLine, address, (int)instructionSize + proceedingNops, (int)instructionSize, labels)
+                PatchDialog dialog = new(currentLine, address, (int)instructionSize + proceedingNops, (int)instructionSize, programState.Labels)
                 {
                     Owner = this
                 };
@@ -2349,7 +2364,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            _ = breakpoints.Remove(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
+            _ = programState.Breakpoints.Remove(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
         }
 
         private void BreakpointButton_Checked(object sender, RoutedEventArgs e)
@@ -2358,7 +2373,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
+            _ = programState.Breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, ((BreakpointButton)sender).Address));
         }
 
         private void BreakpointItem_Click(object sender, RoutedEventArgs e)
@@ -2443,7 +2458,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Remove(sender.Breakpoint);
+            _ = programState.Breakpoints.Remove(sender.Breakpoint);
             UpdateAllInformation();
         }
 
@@ -2459,7 +2474,7 @@ namespace AssEmbly.DebuggerGUI
             {
                 return;
             }
-            _ = breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, (ulong)value.Value));
+            _ = programState.Breakpoints.Add(new RegisterValueBreakpoint(Register.rpo, (ulong)value.Value));
             UpdateAllInformation();
         }
 
@@ -2488,7 +2503,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void ContextMenu_LabelRemoved(ContextMenus.LabelListContextMenu sender)
         {
-            _ = labels.Remove(sender.LabelName);
+            _ = programState.Labels.Remove(sender.LabelName);
             UpdateAllInformation();
         }
 
@@ -2499,7 +2514,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void ContextMenu_LabelDisassembling(ContextMenus.LabelListContextMenu sender)
         {
-            if (labels.TryGetValue(sender.LabelName, out ulong address))
+            if (programState.Labels.TryGetValue(sender.LabelName, out ulong address))
             {
                 DisassembleFromProgramOffset(address, true);
             }
@@ -2556,7 +2571,7 @@ namespace AssEmbly.DebuggerGUI
 
         private void ContextMenu_AddressRemoved(ContextMenus.IAddressContextMenu sender)
         {
-            _ = savedAddresses.Remove(sender.Address);
+            _ = programState.SavedAddresses.Remove(sender.Address);
             UpdateAllInformation();
         }
 
@@ -2568,9 +2583,9 @@ namespace AssEmbly.DebuggerGUI
             }
 
             RegisterValueBreakpoint breakpoint = new(Register.rpo, sender.Address);
-            if (!breakpoints.Add(breakpoint))
+            if (!programState.Breakpoints.Add(breakpoint))
             {
-                breakpoints.Remove(breakpoint);
+                programState.Breakpoints.Remove(breakpoint);
             }
             UpdateAllInformation();
         }
@@ -2738,7 +2753,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Remove(sender.Watch);
+            _ = programState.Breakpoints.Remove(sender.Watch);
             UpdateAllInformation();
         }
 
@@ -2752,7 +2767,7 @@ namespace AssEmbly.DebuggerGUI
             long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
-                _ = breakpoints.Add(new RegisterValueBreakpoint(sender.RepresentedRegister, (ulong)value.Value));
+                _ = programState.Breakpoints.Add(new RegisterValueBreakpoint(sender.RepresentedRegister, (ulong)value.Value));
             }
 
             UpdateAllInformation();
@@ -2785,7 +2800,7 @@ namespace AssEmbly.DebuggerGUI
             if (value is not null)
             {
                 DebuggingProcessor.Registers[(int)sender.RepresentedRegister] = (ulong)value;
-                persistentRegisterEdits[sender.RepresentedRegister] = (ulong)value;
+                programState.PersistentRegisterEdits[sender.RepresentedRegister] = (ulong)value;
             }
 
             UpdateAllInformation();
@@ -2798,7 +2813,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Add(new RegisterChangedBreakpoint(sender.RepresentedRegister,
+            _ = programState.Breakpoints.Add(new RegisterChangedBreakpoint(sender.RepresentedRegister,
                 DebuggingProcessor.Registers[(int)sender.RepresentedRegister]));
 
             UpdateAllInformation();
@@ -2820,7 +2835,7 @@ namespace AssEmbly.DebuggerGUI
             long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
-                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Byte, (byte)value.Value));
+                _ = programState.Breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Byte, (byte)value.Value));
             }
 
             UpdateAllInformation();
@@ -2842,7 +2857,7 @@ namespace AssEmbly.DebuggerGUI
             long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
-                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Word, (ushort)value.Value));
+                _ = programState.Breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.Word, (ushort)value.Value));
             }
 
             UpdateAllInformation();
@@ -2864,7 +2879,7 @@ namespace AssEmbly.DebuggerGUI
             long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
-                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.DoubleWord, (uint)value.Value));
+                _ = programState.Breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.DoubleWord, (uint)value.Value));
             }
 
             UpdateAllInformation();
@@ -2886,7 +2901,7 @@ namespace AssEmbly.DebuggerGUI
             long? value = PromptNumberInput("Enter the value to break when equal to", "New Watch");
             if (value is not null)
             {
-                _ = breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.QuadWord, (ulong)value.Value));
+                _ = programState.Breakpoints.Add(new MemoryValueBreakpoint(sender.Address, PointerReadSize.QuadWord, (ulong)value.Value));
             }
 
             UpdateAllInformation();
@@ -2905,7 +2920,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Byte,
+            _ = programState.Breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Byte,
                 DebuggingProcessor.Memory[sender.Address]));
 
             UpdateAllInformation();
@@ -2924,7 +2939,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Word,
+            _ = programState.Breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.Word,
                 BinaryPrimitives.ReadUInt16LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
 
             UpdateAllInformation();
@@ -2943,7 +2958,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.DoubleWord,
+            _ = programState.Breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.DoubleWord,
                 BinaryPrimitives.ReadUInt32LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
 
             UpdateAllInformation();
@@ -2962,7 +2977,7 @@ namespace AssEmbly.DebuggerGUI
                 return;
             }
 
-            _ = breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.QuadWord,
+            _ = programState.Breakpoints.Add(new MemoryChangedBreakpoint(sender.Address, PointerReadSize.QuadWord,
                 BinaryPrimitives.ReadUInt64LittleEndian(DebuggingProcessor.Memory.AsSpan((int)sender.Address))));
 
             UpdateAllInformation();
@@ -3007,7 +3022,7 @@ namespace AssEmbly.DebuggerGUI
             if (value is not null)
             {
                 DebuggingProcessor.Memory[sender.Address] = (byte)value;
-                persistentMemoryEdits[sender.Address] = (byte)value;
+                programState.PersistentMemoryEdits[sender.Address] = (byte)value;
             }
 
             UpdateAllInformation();
@@ -3052,8 +3067,8 @@ namespace AssEmbly.DebuggerGUI
             if (value is not null)
             {
                 DebuggingProcessor.WriteMemoryWord(sender.Address, (ushort)value);
-                persistentMemoryEdits[sender.Address] = (byte)value;
-                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+                programState.PersistentMemoryEdits[sender.Address] = (byte)value;
+                programState.PersistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
             }
 
             UpdateAllInformation();
@@ -3098,10 +3113,10 @@ namespace AssEmbly.DebuggerGUI
             if (value is not null)
             {
                 DebuggingProcessor.WriteMemoryDWord(sender.Address, (uint)value);
-                persistentMemoryEdits[sender.Address] = (byte)value;
-                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
-                persistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
-                persistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
+                programState.PersistentMemoryEdits[sender.Address] = (byte)value;
+                programState.PersistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+                programState.PersistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
+                programState.PersistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
             }
 
             UpdateAllInformation();
@@ -3146,14 +3161,14 @@ namespace AssEmbly.DebuggerGUI
             if (value is not null)
             {
                 DebuggingProcessor.WriteMemoryQWord(sender.Address, (ulong)value);
-                persistentMemoryEdits[sender.Address] = (byte)value;
-                persistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
-                persistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
-                persistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
-                persistentMemoryEdits[sender.Address + 4] = (byte)(value >> 32);
-                persistentMemoryEdits[sender.Address + 5] = (byte)(value >> 40);
-                persistentMemoryEdits[sender.Address + 6] = (byte)(value >> 48);
-                persistentMemoryEdits[sender.Address + 7] = (byte)(value >> 56);
+                programState.PersistentMemoryEdits[sender.Address] = (byte)value;
+                programState.PersistentMemoryEdits[sender.Address + 1] = (byte)(value >> 8);
+                programState.PersistentMemoryEdits[sender.Address + 2] = (byte)(value >> 16);
+                programState.PersistentMemoryEdits[sender.Address + 3] = (byte)(value >> 24);
+                programState.PersistentMemoryEdits[sender.Address + 4] = (byte)(value >> 32);
+                programState.PersistentMemoryEdits[sender.Address + 5] = (byte)(value >> 40);
+                programState.PersistentMemoryEdits[sender.Address + 6] = (byte)(value >> 48);
+                programState.PersistentMemoryEdits[sender.Address + 7] = (byte)(value >> 56);
             }
 
             UpdateAllInformation();
@@ -3182,13 +3197,13 @@ namespace AssEmbly.DebuggerGUI
 
         private void ContextMenu_EditRemoved(ContextMenus.IAddressContextMenu sender)
         {
-            _ = persistentMemoryEdits.Remove(sender.Address);
+            _ = programState.PersistentMemoryEdits.Remove(sender.Address);
             UpdateAllInformation();
         }
 
         private void RegisterContextMenu_EditRemoved(ContextMenus.RegisterPersistentEditContextMenu sender)
         {
-            _ = persistentRegisterEdits.Remove(sender.RepresentedRegister);
+            _ = programState.PersistentRegisterEdits.Remove(sender.RepresentedRegister);
             UpdateAllInformation();
         }
 
@@ -3215,6 +3230,11 @@ namespace AssEmbly.DebuggerGUI
             }
 
             Clipboard.SetText(DebuggingProcessor.Memory[sender.Address].ToString("X2"));
+        }
+
+        private void ResetItem_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteProgramSaveState();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -3286,12 +3306,20 @@ namespace AssEmbly.DebuggerGUI
                 case Key.F1 when e.KeyboardDevice.Modifiers == ModifierKeys.None:
                     OpenAboutWindowDialog();
                     break;
+                case Key.R when e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift):
+                    DeleteProgramSaveState();
+                    break;
                 default:
                     consumed = false;
                     break;
             }
 
             e.Handled = consumed;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            UnloadExecutable();
         }
     }
 }

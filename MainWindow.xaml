@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         xmlns:menu="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -52,6 +52,11 @@
             <MenuItem Padding="0" ToolTip="Restart (CTRL+R)" Click="RestartItem_Click">
                 <MenuItem.Icon>
                     <Image Source="pack://application:,,,/Icons/arrow-circle.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Padding="0" ToolTip="Delete Saved Data (CTRL+Alt+Shift+R)" Click="ResetItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="pack://application:,,,/Icons/document-shred.png"/>
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
