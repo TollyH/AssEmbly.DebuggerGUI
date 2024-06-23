@@ -197,11 +197,11 @@ namespace AssEmbly.DebuggerGUI
         private static partial Regex DirectiveRegex();
 
         // Literals
-        [GeneratedRegex(@"(?i)(?<=\s|,|\(|\[)0b[0-1_]+?(?=\s|,|$|;|\)|\])")]
+        [GeneratedRegex(@"(?i)(?<=\s|,|\(|\[)-?0b[0-1_]+?(?=\s|,|$|;|\)|\])")]
         private static partial Regex NumericLiteralBinaryRegex();
         [GeneratedRegex(@"(?<=\s|,|\(|\[)[\-0-9._][0-9_.]*?(?=\s|,|$|;|\)|\])")]
         private static partial Regex NumericLiteralDecimalRegex();
-        [GeneratedRegex(@"(?i)(?<=\s|,|\(|\[)0x[0-9a-f_]+?(?=\s|,|$|;|\)|\])")]
+        [GeneratedRegex(@"(?i)(?<=\s|,|\(|\[)-?0x[0-9a-f_]+?(?=\s|,|$|;|\)|\])")]
         private static partial Regex NumericLiteralHexadecimalRegex();
         [GeneratedRegex(@"(?<=\s|,|\(|\[):[0-9_]+?(?=\s|,|$|;|\)|\])")]
         private static partial Regex AddressLiteralDecimalRegex();
