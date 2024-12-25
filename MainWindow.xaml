@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AssEmbly.DebuggerGUI"
         xmlns:menu="clr-namespace:AssEmbly.DebuggerGUI.ContextMenus"
         mc:Ignorable="d"
-        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed">
+        Title="AssEmbly Debugger" Height="700" Width="1200" Background="#FF424242" Icon="pack://application:,,,/Icons/bug.png" PreviewKeyDown="Window_PreviewKeyDown" Closed="Window_Closed" UseLayoutRounding="True">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
